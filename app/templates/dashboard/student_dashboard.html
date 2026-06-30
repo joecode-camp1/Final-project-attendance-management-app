@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard — AttendanceMS</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+
+    <style>
+        /* ── Session notification banner ── */
+        #session-banner {
+            display: none;
+            position: fixed;
+            top: 1.25rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            min-width: 320px;
+            max-width: 90vw;
+            background: linear-gradient(135deg, #0d2137, #0a3d2e);
+            border: 1px solid #2ecc71;
+            border-radius: 14px;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            gap: 1rem;
+            animation: slideDown 0.4s ease;
+        }
+        #session-banner.visible {
+            display: flex;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+            to   { opacity: 1; transform: translateX(-50%) translateY(0);     }
+        }
+        #session-banner .banner-icon {
+            font-size: 1.75rem;
+            flex-shrink: 0;
+        }
+        #session-banner .banner-body {
+            flex: 1;
+        }
+        #session-banner .banner-title {
+            color: #2ecc71;
+            font-weight: 700;
+            font-size: 0.95rem;
+            margin-bottom: 0.15rem;
+        }
+        #session-banner .banner-sub {
+            color: #8ab4d4;
+            font-size: 0.82rem;
+        }
+        #session-banner .banner-btn {
+            padding: 0.5rem 1.25rem;
+            border-radius: 8px;
+            border: none;
+            background: #2ecc71;
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: opacity 0.2s;
+        }
+        #session-banner .banner-btn:hover { opacity: 0.85; }
+        #session-banner .banner-close {
+            background: none;
+            border: none;
+            color: #4a6a8a;
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 0 0.25rem;
+            flex-shrink: 0;
+        }
+        #session-banner .banner-close:hover { color: #cde; }
+    </style>
+</head>
+
+<body>
+
+<!-- ================= SESSION NOTIFICATION BANNER ================= -->
+<div id="session-banner" role="alert" aria-live="polite">
+    <span class="banner-icon">🔔</span>
+    <div class="banner-body">
+        <div class="banner-title" id="banner-title">Class session started!</div>
+        <div class="banner-sub"  id="banner-sub"></div>
+    </div>
+    <button class="banner-btn" onclick="scrollToAttendance()">Mark Attendance</button>
+    <button class="banner-close" onclick="dismissBanner()" title="Dismiss">✕</button>
+</div>
+
+<div class="sparkles">
+    <span style="top:10%;left:15%"></span>
+    <span style="top:25%;left:70%"></span>
+    <span style="top:40%;left:35%"></span>
+    <span style="top:60%;left:80%"></span>
+    <span style="top:75%;left:20%"></span>
+    <span style="top:85%;left:55%"></span>
+    <span style="top:15%;left:90%"></span>
+    <span style="top:55%;left:10%"></span>
+</div>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+    <div class="logo">
+        <img src="{{ url_for('static', filename='images/logo.jpg') }}" alt="Logo">
+    </div>
+    <ul>
+        <li><a href="{{ url_for('dashboard.dashboard') }}">Dashboard</a></li>
+        <li><a href="{{ url_for('home.index') }}">Home</a></li>
+        <li><a href="#attendance">Attendance</a></li>
+        <li><a href="#records">My Records</a></li>
+        <li><a href="#weekly">Weekly Summary</a></li>
+        <li><a href="{{ url_for('auth.logout') }}">Logout</a></li>
+    </ul>
+</nav>
+
+<!-- MAIN -->
+<main class="dashboard-container">
+
+    <!-- HEADER -->
+    <section class="dashboard-header">
+        <h2>Welcome, {{ user.name }}</h2>
+        <p id="datetime"></p>
+    </section>
+
+    <!-- STATS -->
+    <section class="stats">
+        <div class="card">Total Sessions: {{ total_records }}</div>
+        <div class="card">Present: {{ present_count }}</div>
+        <div class="card">Absent: {{ absent_count }}</div>
+        <div class="card">Attendance Rate: {{ attendance_rate }}%</div>
+    </section>
+
+    <!-- ================= ATTENDANCE BUTTON SECTION ================= -->
+    <section id="attendance" style="margin:2rem 0;">
+
+        <h3 style="
+            margin-bottom:1rem;
+            color:#1d4ed8;
+            font-size:1.8rem;
+            font-weight:700;
+        ">
+            Mark My Attendance
+        </h3>
+
+        <!-- STATE 1: checking -->
+        <div id="attendance-checking" style="color:#8ab4d4;">
+            Checking for active session...
+        </div>
+
+        <!-- STATE 2: no active session -->
+        <div id="attendance-none" style="display:none; color:#4a6a8a;
+             padding:1.25rem; border:1px dashed #1e3a5f; border-radius:10px;">
+            No active session right now. Your teacher hasn't started one yet.
+        </div>
+
+        <!-- STATE 3: not assigned to a class -->
+        <div id="attendance-no-class" style="display:none; color:#f39c12;
+             padding:1.25rem; border:1px dashed #f39c12; border-radius:10px;">
+            You are not assigned to a class yet. Ask your admin to assign you.
+        </div>
+
+        <!-- STATE 4: active session found -->
+        <div id="attendance-active" style="display:none; padding:1.5rem;
+             border:1px solid #1e3a5f; border-radius:12px; background:#0d2137;">
+
+            <div style="margin-bottom:1rem;">
+                <strong id="session-class" style="color:#cde; font-size:1.1rem;"></strong>
+                <span id="session-time" style="color:#8ab4d4; margin-left:0.75rem;
+                                               font-size:0.9rem;"></span>
+                <span id="session-location" style="color:#4a6a8a; margin-left:0.5rem;
+                                                   font-size:0.85rem;"></span>
+            </div>
+
+            <button id="markBtn" onclick="markAttendance()"
+                    style="padding:0.75rem 2rem; border-radius:8px; border:none;
+                           background:#2ecc71; color:#fff; font-size:1rem;
+                           cursor:pointer; font-weight:600; transition:opacity 0.2s;">
+                ✅ Mark Me Present
+            </button>
+
+        </div>
+
+        <!-- STATE 5: already marked -->
+        <div id="attendance-done" style="display:none; padding:1.25rem;
+             border:1px solid #2ecc71; border-radius:10px; background:#0a1c10;">
+            <span id="done-icon" style="font-size:1.5rem;">✅</span>
+            <strong id="done-status" style="color:#2ecc71; margin-left:0.5rem;
+                                            font-size:1rem;"></strong>
+            <p id="done-time" style="color:#4a6a8a; margin:0.5rem 0 0;
+                                     font-size:0.85rem;"></p>
+        </div>
+
+        <!-- STATE 6: error -->
+        <div id="attendance-error" style="display:none; color:#e74c3c;
+             padding:1.25rem; border:1px dashed #e74c3c; border-radius:10px;">
+            <span id="error-msg">Something went wrong. Please try again.</span>
+            <br>
+            <button onclick="checkSession()"
+                    style="margin-top:0.75rem; padding:0.5rem 1.25rem;
+                           border-radius:6px; border:none; background:#1e3a5f;
+                           color:#7faeff; cursor:pointer;">
+                🔄 Retry
+            </button>
+        </div>
+
+    </section>
+
+    <!-- ================= MY ATTENDANCE RECORDS ================= -->
+    <section id="records" style="margin:2rem 0;">
+
+        <h3 style="margin-bottom:1rem;">My Attendance Records</h3>
+
+        {% if records %}
+        <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse;">
+                <thead>
+                    <tr style="text-align:left; border-bottom:2px solid #1e3a5f;
+                               color:#8ab4d4;">
+                        <th style="padding:0.75rem;">Date</th>
+                        <th style="padding:0.75rem;">Class</th>
+                        <th style="padding:0.75rem;">Status</th>
+                        <th style="padding:0.75rem;">Sign-in Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rec in records %}
+                    <tr style="border-bottom:1px solid #0f2540; color:#cde;">
+                        <td style="padding:0.75rem;">
+                            {{ rec.created_at.strftime('%b %d, %Y') if rec.created_at else '—' }}
+                        </td>
+                        <td style="padding:0.75rem; color:#8ab4d4;">
+                            {{ rec.session.class_.name if rec.session and rec.session.class_ else '—' }}
+                        </td>
+                        <td style="padding:0.75rem;">
+                            {% if rec.status == 'present' %}
+                                <span style="color:#2ecc71;">✅ Present</span>
+                            {% elif rec.status == 'late' %}
+                                <span style="color:#f39c12;">⏰ Late</span>
+                            {% else %}
+                                <span style="color:#e74c3c;">🚫 Absent</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding:0.75rem; color:#8ab4d4;">
+                            {{ rec.sign_in_time.strftime('%I:%M %p') if rec.sign_in_time else '—' }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p style="color:#4a6a8a; padding:1.5rem; border:1px dashed #1e3a5f;
+                  border-radius:10px; text-align:center;">
+            No attendance records yet.
+        </p>
+        {% endif %}
+
+    </section>
+
+    <!-- ================= WEEKLY SUMMARY ================= -->
+    <section id="weekly" class="weekly-summary" style="margin:2rem 0;">
+        <h3>Weekly Attendance</h3>
+        <table>
+            <tr><th>Day</th><th>Status</th></tr>
+            {% for day in weekly %}
+            <tr>
+                <td>{{ day.name }}</td>
+                <td class="{{ day.status }}">{{ day.status }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </section>
+
+</main>
+
+<footer class="dashboard-footer">
+    <div class="footer-content">
+        <div class="footer-left">
+            <h4>AttendanceMS</h4>
+            <p>Smart Attendance Management System</p>
+        </div>
+        <div class="footer-right">
+            <p>&copy; 2026 AttendanceMS</p>
+            <p>All Rights Reserved</p>
+        </div>
+    </div>
+</footer>
+
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+
+<script>
+// ── State elements ────────────────────────────────────────
+const el = {
+    checking : document.getElementById('attendance-checking'),
+    none     : document.getElementById('attendance-none'),
+    noClass  : document.getElementById('attendance-no-class'),
+    active   : document.getElementById('attendance-active'),
+    done     : document.getElementById('attendance-done'),
+    error    : document.getElementById('attendance-error'),
+};
+
+let activeSessionId  = null;
+let lastKnownSession = null;   // tracks session_id so we only notify once per session
+let bannerDismissed  = false;  // user can dismiss; don't re-show for same session
+
+function showOnly(key) {
+    Object.keys(el).forEach(k => el[k].style.display = k === key ? 'block' : 'none');
+}
+
+// ── Banner helpers ────────────────────────────────────────
+function showBanner(className, startTime, location) {
+    const banner = document.getElementById('session-banner');
+    document.getElementById('banner-title').textContent =
+        `📢 Session started: ${className}`;
+    document.getElementById('banner-sub').textContent =
+        `Started at ${startTime}` + (location ? ` · ${location}` : '');
+    banner.classList.add('visible');
+
+    // auto-hide after 10 seconds if not dismissed
+    setTimeout(() => dismissBanner(), 10000);
+}
+
+function dismissBanner() {
+    const banner = document.getElementById('session-banner');
+    banner.classList.remove('visible');
+    bannerDismissed = true;
+}
+
+function scrollToAttendance() {
+    dismissBanner();
+    document.getElementById('attendance').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ── Poll for active session ───────────────────────────────
+async function checkSession() {
+    try {
+        const res  = await fetch('/dashboard/active-session');
+        const data = await res.json();
+
+        if (data.error) {
+            showOnly('none');
+            return;
+        }
+
+        if (!data.active && data.no_class) {
+            showOnly('noClass');
+            return;
+        }
+
+        if (!data.active) {
+            // session ended — reset so we can notify again next time
+            if (lastKnownSession !== null) {
+                lastKnownSession = null;
+                bannerDismissed  = false;
+            }
+            showOnly('none');
+            return;
+        }
+
+        // ── Active session found ──────────────────────────
+        activeSessionId = data.session_id;
+
+        // Fill in session info in the card
+        document.getElementById('session-class').textContent    = data.class_name;
+        document.getElementById('session-time').textContent     = '@ ' + data.start_time;
+        document.getElementById('session-location').textContent =
+            data.location ? '· ' + data.location : '';
+
+        // Show banner only once per new session
+        if (data.session_id !== lastKnownSession && !bannerDismissed) {
+            lastKnownSession = data.session_id;
+            showBanner(data.class_name, data.start_time, data.location);
+        } else if (data.session_id !== lastKnownSession) {
+            // new session but banner was dismissed for old one — reset
+            lastKnownSession = data.session_id;
+            bannerDismissed  = false;
+            showBanner(data.class_name, data.start_time, data.location);
+        }
+
+        if (data.already_marked) {
+            showMarked(data.my_status, null);
+        } else {
+            showOnly('active');
+        }
+
+    } catch (e) {
+        showOnly('none');
+    }
+}
+
+// ── Student clicks Mark Present ───────────────────────────
+async function markAttendance() {
+    if (!activeSessionId) return;
+
+    const btn = document.getElementById('markBtn');
+    btn.disabled      = true;
+    btn.textContent   = '⏳ Submitting...';
+    btn.style.opacity = '0.7';
+
+    try {
+        const res  = await fetch(`/dashboard/self-mark/${activeSessionId}`, {
+            method : 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            dismissBanner();
+            showMarked(data.status, data.time);
+        } else {
+            btn.disabled      = false;
+            btn.textContent   = '✅ Mark Me Present';
+            btn.style.opacity = '1';
+            document.getElementById('error-msg').textContent =
+                data.error || 'Something went wrong. Try again.';
+            showOnly('error');
+        }
+    } catch (e) {
+        btn.disabled      = false;
+        btn.textContent   = '✅ Mark Me Present';
+        btn.style.opacity = '1';
+        document.getElementById('error-msg').textContent =
+            'Network error. Please check your connection and try again.';
+        showOnly('error');
+    }
+}
+
+// ── Show the "already marked" state ──────────────────────
+function showMarked(status, time) {
+    const icons  = { present: '✅', late: '⏰', absent: '🚫' };
+    const labels = { present: 'Marked Present', late: 'Marked Late', absent: 'Marked Absent' };
+    const colors = { present: '#2ecc71', late: '#f39c12', absent: '#e74c3c' };
+
+    document.getElementById('done-icon').textContent   = icons[status]  || '✅';
+    document.getElementById('done-status').textContent = labels[status] || 'Attendance recorded';
+    document.getElementById('done-status').style.color = colors[status] || '#2ecc71';
+    document.getElementById('done-time').textContent   = time
+        ? 'Signed in at ' + time
+        : 'Attendance already recorded for this session.';
+
+    showOnly('done');
+}
+
+// ── Live clock ────────────────────────────────────────────
+function updateClock() {
+    const el = document.getElementById('datetime');
+    if (el) el.textContent = new Date().toLocaleString();
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+// ── Start polling every 10 seconds ───────────────────────
+checkSession();
+setInterval(checkSession, 10000);
+</script>
+
+</body>
+</html>

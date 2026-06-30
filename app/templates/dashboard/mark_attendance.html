@@ -1,0 +1,115 @@
+{% extends "dashboard/base_admin_dashboard.html" %}
+
+{% block title %}Mark Attendance{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_teacher.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <h2>Mark Attendance</h2>
+    <p>
+        {{ att_session.class_.name if att_session.class_ else 'Class' }} —
+        {{ att_session.date.strftime('%B %d, %Y') }} at
+        {{ att_session.start_time.strftime('%I:%M %p') }}
+        {% if att_session.location %} · {{ att_session.location }}{% endif %}
+    </p>
+</div>
+
+{% if message %}
+<div class="alert-message" style="margin-bottom:1rem; color:#2ecc71;">{{ message }}</div>
+{% endif %}
+
+<section class="card" style="margin-top:1.5rem; padding:1.5rem;">
+
+    {% if students %}
+    <form method="POST"
+          action="{{ url_for('dashboard.mark_attendance_session', session_id=att_session.id) }}">
+
+        <table style="width:100%; border-collapse:collapse;">
+            <thead>
+                <tr style="text-align:left; border-bottom:1px solid #1e3a5f; color:#8ab4d4;">
+                    <th style="padding:0.75rem;">Student</th>
+                    <th style="padding:0.75rem;">ID</th>
+                    <th style="padding:0.75rem;">Status</th>
+                    <th style="padding:0.75rem;">Sign-in Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                {% set rec = existing.get(student.id) %}
+                <tr style="border-bottom:1px solid #0f2540; color:#cde;">
+
+                    <td style="padding:0.75rem;">{{ student.name }}</td>
+                    <td style="padding:0.75rem; color:#8ab4d4;">{{ student.unique_id }}</td>
+
+                    <td style="padding:0.75rem;">
+                        <label style="margin-right:1rem; cursor:pointer;">
+                            <input type="radio" name="status_{{ student.id }}" value="present"
+                                   {{ 'checked' if rec and rec.status == 'present' else '' }}>
+                            <span style="color:#2ecc71;">Present</span>
+                        </label>
+                        <label style="margin-right:1rem; cursor:pointer;">
+                            <input type="radio" name="status_{{ student.id }}" value="absent"
+                                   {{ 'checked' if not rec or rec.status == 'absent' else '' }}>
+                            <span style="color:#e74c3c;">Absent</span>
+                        </label>
+                        <label style="cursor:pointer;">
+                            <input type="radio" name="status_{{ student.id }}" value="late"
+                                   {{ 'checked' if rec and rec.status == 'late' else '' }}>
+                            <span style="color:#f39c12;">Late</span>
+                        </label>
+                    </td>
+
+                    <td style="padding:0.75rem;">
+                        <input type="time" name="sign_in_{{ student.id }}"
+                               value="{{ rec.sign_in_time.strftime('%H:%M') if rec and rec.sign_in_time else now_time }}"
+                               style="padding:0.4rem 0.75rem; border-radius:6px;
+                                      background:#0d2137; border:1px solid #1e3a5f; color:#cde;">
+                    </td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div style="margin-top:1.5rem; display:flex; gap:1rem;">
+
+            <!-- FIX: removed 'export' class — it was being hijacked by initExportButtons() in dashboard.js -->
+            <button type="submit" class="btn"
+                    style="padding:0.7rem 2rem;">
+                Save Attendance
+            </button>
+
+            <a href="{{ url_for('dashboard.start_session') }}"
+               class="btn"
+               style="padding:0.7rem 2rem; border-radius:8px; background:#1e3a5f;
+                      color:#cde; text-decoration:none;">
+                + New Session
+            </a>
+
+            <a href="{{ url_for('dashboard.sessions') }}"
+               style="padding:0.7rem 2rem; border-radius:8px; border:1px solid #1e3a5f;
+                      color:#8ab4d4; text-decoration:none;">
+                Back to Sessions
+            </a>
+
+        </div>
+
+    </form>
+
+    {% else %}
+    <p style="color:#8ab4d4; text-align:center; padding:2rem;">
+        No students are assigned to this class yet.
+        <a href="{{ url_for('dashboard.students_registered') }}"
+           style="color:#4f8ef7; margin-left:0.5rem;">Assign students →</a>
+    </p>
+    {% endif %}
+
+</section>
+
+{% endblock %}
+
+{% block extra_js %}{% endblock %}

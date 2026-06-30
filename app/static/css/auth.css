@@ -1,0 +1,358 @@
+/* AUTH PAGE WRAPPER (LOGIN + SIGNUP) */
+.auth-section {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px 16px;
+    box-sizing: border-box;
+
+    background: linear-gradient(135deg, #0b1b4d, #1e3a8a);
+    position: relative;
+    overflow: hidden;
+}
+
+/* glowing circles background */
+.auth-section::before,
+.auth-section::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    background: white;
+    opacity: 0.08;
+    filter: blur(2px);
+}
+
+.auth-section::before {
+    width: 350px;
+    height: 350px;
+    top: -120px;
+    left: -120px;
+}
+
+.auth-section::after {
+    width: 250px;
+    height: 250px;
+    bottom: -80px;
+    right: -80px;
+}
+
+/* AUTH BOX */
+.auth-container {
+    position: relative;
+    z-index: 2;
+
+    width: 360px;
+    max-height: 92vh;
+    overflow-y: auto;
+    padding: 28px 32px;
+
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+
+    border-radius: 14px;
+    backdrop-filter: blur(10px);
+
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    color: white;
+}
+
+/* slim scrollbar so it doesn't look clunky on the glass box */
+.auth-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.auth-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 4px;
+}
+
+/* HEADER */
+.auth-header h1 {
+    font-size: 1.6rem;
+    margin-bottom: 4px;
+}
+
+.auth-header p {
+    color: #cbd5e1;
+    margin-bottom: 14px;
+    font-size: 13px;
+}
+
+/* INPUTS & DROPDOWN */
+.auth-form label {
+    font-size: 13px;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.auth-form input,
+.auth-form select {
+    width: 100%;
+    padding: 9px 12px;
+    margin-top: 4px;
+    margin-bottom: 8px;
+
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+
+    color: white;
+    outline: none;
+    font-size: 14px;
+
+    transition: 0.3s;
+    box-sizing: border-box;
+}
+
+.auth-form input:focus,
+.auth-form select:focus {
+    border-color: white;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+/* DROPDOWN OPTIONS */
+.auth-form select option {
+    background: #1e3a8a;
+    color: white;
+}
+
+/* BUTTON */
+.btn {
+    width: 100%;
+    padding: 10px;
+    margin-top: 4px;
+
+    background: white;
+    color: #0f172a;
+
+    border: none;
+    border-radius: 8px;
+
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+
+    transition: 0.3s;
+}
+
+.btn:hover {
+    background: #cbd5e1;
+}
+
+/* CONTACT / EXTRA LINKS */
+.auth-contact {
+    text-align: center;
+    margin-top: 14px;
+}
+
+.auth-extra {
+    text-align: center;
+    margin-top: 12px;
+    font-size: 13px;
+}
+
+.auth-contact p {
+    color: #666;
+    margin-bottom: 6px;
+}
+
+.auth-contact a,
+.auth-extra a {
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+    transition: 0.2s ease;
+}
+
+.auth-extra a:hover {
+    color: #60a5fa;
+    text-decoration: underline;
+}
+
+.auth-contact a:hover {
+    text-decoration: underline;
+}
+
+.alert-message {
+    background: #ffe5e5;
+    color: #c62828;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    text-align: center;
+}
+
+.alert-message a {
+    color: #0b57d0;
+    font-weight: 600;
+    text-decoration: none;
+    margin-left: 5px;
+}
+
+.alert-message a:hover {
+    text-decoration: underline;
+}
+
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-wrapper input {
+    width: 100%;
+    padding-right: 42px;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    padding: 4px;
+}
+
+.toggle-password:hover {
+    color: white;
+}
+
+.password-requirements {
+    list-style: none;
+    margin: 4px 0 8px;
+    padding: 0;
+    display: grid;
+    gap: 2px;
+}
+
+.password-requirements li {
+    font-size: 12px;
+    color: #cbd5e1;
+    padding-left: 18px;
+    position: relative;
+}
+
+.password-requirements li::before {
+    content: "✕";
+    position: absolute;
+    left: 0;
+    color: #94a3b8;
+    font-size: 11px;
+}
+
+.password-requirements li.valid {
+    color: #4ade80;
+}
+
+.password-requirements li.valid::before {
+    content: "✓";
+    color: #4ade80;
+}
+
+.password-requirements li.invalid::before {
+    content: "✕";
+    color: #94a3b8;
+}
+
+.field-hint {
+    font-size: 12px;
+    margin: 2px 0 8px;
+}
+
+.field-hint.valid {
+    color: #4ade80;
+}
+
+.field-hint.invalid {
+    color: #f87171;
+}
+
+.alert-message.success {
+    background: #ecfdf5;
+    color: #15803d;
+    border: 1px solid #a7f3d0;
+}
+/* ============================
+   RESPONSIVE: TABLET (≤768px)
+   ============================ */
+@media (max-width: 768px) {
+    .auth-container {
+        width: 90%;
+        max-width: 400px;
+        padding: 26px 24px;
+    }
+
+    .auth-header h1 {
+        font-size: 1.4rem;
+    }
+
+    .navbar ul {
+        gap: 12px;
+        font-size: 14px;
+    }
+}
+
+/* ============================
+   RESPONSIVE: PHONE (≤480px)
+   ============================ */
+@media (max-width: 480px) {
+    .auth-section {
+        padding: 16px 12px;
+        align-items: flex-start;
+        padding-top: 40px;
+    }
+
+    .auth-container {
+        width: 100%;
+        max-width: 100%;
+        max-height: none;
+        padding: 22px 18px;
+        border-radius: 10px;
+    }
+
+    .auth-header h1 {
+        font-size: 1.3rem;
+    }
+
+    .auth-header p {
+        font-size: 12.5px;
+    }
+
+    .auth-form input,
+    .auth-form select {
+        padding: 10px 12px;
+        font-size: 15px; /* keeps iOS from auto-zooming inputs */
+    }
+
+    .btn {
+        padding: 12px;
+        font-size: 15px;
+    }
+
+    .toggle-password {
+        font-size: 16px;
+        padding: 6px;
+    }
+
+    .password-requirements li,
+    .field-hint {
+        font-size: 11.5px;
+    }
+}
+
+/* Very small phones (≤360px) */
+@media (max-width: 360px) {
+    .auth-container {
+        padding: 18px 14px;
+    }
+
+    .auth-header h1 {
+        font-size: 1.2rem;
+    }
+}

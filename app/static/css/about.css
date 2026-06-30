@@ -1,0 +1,184 @@
+/* ==========================
+   ABOUT PAGE
+========================== */
+
+.about-section {
+    padding: 80px 8%;
+    background: linear-gradient(
+        135deg,
+        #f7faff,
+        #edf4ff
+    );
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Decorative circles */
+
+.about-section::before {
+    content: "";
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+
+    background: rgba(30, 58, 138, 0.05);
+
+    top: -250px;
+    right: -150px;
+}
+
+.about-section::after {
+    content: "";
+    position: absolute;
+    width: 350px;
+    height: 350px;
+    border-radius: 50%;
+
+    background: rgba(30, 58, 138, 0.05);
+
+    bottom: -150px;
+    left: -100px;
+}
+
+/* ==========================
+   HEADING
+========================== */
+
+.section-heading {
+    text-align: center;
+    margin-bottom: 70px;
+}
+
+.section-heading span {
+    color: #2563eb;
+    letter-spacing: 3px;
+    font-weight: 700;
+}
+
+.section-heading h1 {
+    font-size: 3rem;
+    color: #0b1b4d;
+    margin-top: 15px;
+}
+
+.heading-line {
+    width: 150px;
+    height: 4px;
+    margin: 20px auto;
+
+    border-radius: 50px;
+
+    background: linear-gradient(
+        90deg,
+        #2563eb,
+        silver,
+        #2563eb
+    );
+}
+
+/* ==========================
+   CARD
+========================== */
+
+.info-card {
+    display: flex;
+    align-items: center;
+
+    gap: 35px;
+
+    background: white;
+
+    padding: 30px;
+
+    margin-bottom: 30px;
+
+    border-radius: 20px;
+
+    border-right: 5px solid #2563eb;
+
+    box-shadow:
+        0 10px 30px rgba(0,0,0,0.08);
+
+    transition: 0.4s ease;
+
+    position: relative;
+}
+
+.info-card:hover {
+    transform: translateY(-10px);
+
+    box-shadow:
+        0 20px 40px rgba(37,99,235,0.15);
+}
+
+/* ==========================
+   ICON BOX
+========================== */
+
+.card-icon {
+
+    width: 100px;
+    height: 100px;
+
+    min-width: 100px;
+
+    border-radius: 20px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 2.5rem;
+
+    color: white;
+
+    background: linear-gradient(
+        135deg,
+        #0b1b4d,
+        #2563eb
+    );
+}
+
+/* ==========================
+   CONTENT
+========================== */
+
+.card-content {
+    border-left: 2px solid #d1d5db;
+    padding-left: 30px;
+}
+
+.card-content h2 {
+    color: #0b1b4d;
+    font-size: 1.8rem;
+    margin-bottom: 15px;
+}
+
+.card-content p {
+    color: #475569;
+    line-height: 1.8;
+    font-size: 1rem;
+}
+
+/* ==========================
+   RESPONSIVE
+========================== */
+
+@media(max-width:768px){
+
+    .info-card{
+        flex-direction:column;
+        text-align:center;
+    }
+
+    .card-content{
+        border-left:none;
+        padding-left:0;
+    }
+
+    .section-heading h1{
+        font-size:2.2rem;
+    }
+}

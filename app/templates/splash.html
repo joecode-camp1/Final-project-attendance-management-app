@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Management System</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/splash.css') }}">
+</head>
+
+<body>
+
+<div class="stars"></div>
+
+<div class="splash-container">
+
+    <div class="logo-container">
+
+        <div class="glow-ring"></div>
+
+        <img src="{{ url_for('static', filename='images/logo.jpg') }}"
+             alt="AttendanceMS Logo"
+             class="logo">
+
+    </div>
+
+    <h1 class="title">
+        Attendance Management System
+    </h1>
+
+    <p class="subtitle">
+        Efficient • Reliable • Accessible
+    </p>
+
+    <div class="loader">
+
+        <span></span>
+        <span></span>
+        <span></span>
+
+    </div>
+
+</div>
+
+<script>
+setTimeout(() => {
+
+    document.body.classList.add("fade-out");
+
+    setTimeout(() => {
+
+        window.location.href="{{ url_for('home.index') }}";
+
+    },800);
+
+},3200);
+</script>
+
+<script src="{{ url_for('static', filename='js/splash.js') }}"></script>
+
+</body>
+</html>

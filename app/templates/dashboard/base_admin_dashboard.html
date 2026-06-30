@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AttendanceMS{% endblock %}</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_teacher.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/approve_students.css') }}">
+    {% block extra_css %}{% endblock %}
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<!-- ================= TOP NAV ================= -->
+<header class="top-horiz-nav">
+  <div class="horiz-nav-inner">
+
+    <a href="{{ url_for('dashboard.dashboard') }}" class="horiz-brand-pill">
+      <span class="horiz-brand-icon">🏠</span>
+      <span class="horiz-brand-name">Home</span>
+    </a>
+
+    <form class="horiz-search-form" id="searchForm">
+      <input type="text" placeholder="Search students, attendance..."
+             id="searchInput" autocomplete="off">
+      <div class="search-results" id="searchResults"></div>
+    </form>
+
+    <button class="horiz-icon-btn" id="themeToggle" title="Toggle theme">🌙</button>
+
+    <!-- NOTIFICATION BELL + DROPDOWN -->
+    <div class="notification-wrapper" style="position:relative;">
+
+        <button onclick="toggleNotifPanel()"
+                style="background:none; border:none; cursor:pointer;
+                       font-size:1.2rem; position:relative; padding:0.25rem;">
+            🔔
+            <span id="nav-notif-count"
+                  style="position:absolute; top:-4px; right:-6px;
+                         background:#e74c3c; color:#fff; border-radius:50%;
+                         font-size:0.65rem; width:18px; height:18px;
+                         display:flex; align-items:center; justify-content:center;
+                         font-weight:700;">
+                {{ notification_count | default(0) }}
+            </span>
+        </button>
+
+        <!-- DROPDOWN PANEL -->
+        <div id="notif-panel"
+             style="display:none; position:absolute; top:2.5rem; right:0;
+                    width:340px; max-height:420px; overflow-y:auto;
+                    background:#0d2137; border:1px solid #1e3a5f;
+                    border-radius:12px; box-shadow:0 8px 32px rgba(0,0,0,0.4);
+                    z-index:9999;">
+
+            <div style="padding:1rem 1.25rem; border-bottom:1px solid #1e3a5f;
+                        display:flex; justify-content:space-between; align-items:center;">
+                <strong style="color:#cde;">Notifications</strong>
+                <span id="notif-urgent-badge"
+                      style="background:#e74c3c; color:#fff; border-radius:20px;
+                             padding:0.15rem 0.6rem; font-size:0.75rem;">
+                    {{ notification_count | default(0) }} urgent
+                </span>
+            </div>
+
+            <div id="notif-list" style="padding:0.5rem 0;">
+                <div style="padding:1rem; color:#4a6a8a; text-align:center;">
+                    Loading...
+                </div>
+            </div>
+
+            <div style="padding:0.75rem 1.25rem; border-top:1px solid #1e3a5f;
+                        text-align:center;">
+                <button onclick="refreshNotifPanel()"
+                        style="background:none; border:none; color:#7faeff;
+                               cursor:pointer; font-size:0.85rem;">
+                    🔄 Refresh
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <span class="horiz-username">{{ user.name if user else 'User' }}</span>
+    <a href="{{ url_for('auth.logout') }}" class="horiz-logout-btn">Logout</a>
+
+  </div>
+</header>
+
+
+<!-- ================= MAIN WRAPPER ================= -->
+<div class="main-wrapper">
+
+    <!-- ================= SIDEBAR ================= -->
+    <aside class="sidebar">
+
+        <div>
+            <!-- BRAND -->
+            <div class="sidebar-brand">
+                <img src="{{ url_for('static', filename='images/logo.jpg') }}"
+                     alt="Logo" class="brand-logo">
+                <span class="brand-name">AttendanceMS</span>
+            </div>
+
+            <!-- NAV LINKS -->
+            <nav class="sidebar-nav">
+
+                <a href="{{ url_for('dashboard.dashboard') }}"
+                   class="nav-link {{ 'active' if active_page == 'dashboard' else '' }}">
+                    🏠 Dashboard
+                </a>
+
+                <a href="{{ url_for('dashboard.manage_classes') }}"
+                   class="nav-link {{ 'active' if active_page == 'classes' else '' }}">
+                    📖 Classes
+                </a>
+
+                <a href="{{ url_for('dashboard.sessions') }}"
+                   class="nav-link {{ 'active' if active_page == 'sessions' else '' }}">
+                    🗓️ Sessions
+                </a>
+
+                <a href="{{ url_for('dashboard.start_session') }}"
+                   class="nav-link {{ 'active' if active_page == 'start' else '' }}">
+                    ▶️ Start Session
+                </a>
+
+                <a href="{{ url_for('dashboard.students_registered') }}"
+                   class="nav-link {{ 'active' if active_page == 'students' else '' }}">
+                    👥 Students
+                </a>
+
+                {# FIX: use the `role` variable passed from the view, not session.get('role') #}
+                {% if role in ('admin', 'teacher') %}
+                <a href="{{ url_for('dashboard.approve_students') }}"
+                   class="nav-link {{ 'active' if active_page == 'approve_students' else '' }}">
+                    ✅ Approve Students
+                    <span id="pending-approval-count"
+                          style="margin-left:auto; background:#f39c12; color:#fff;
+                                 border-radius:20px; padding:0.1rem 0.5rem;
+                                 font-size:0.7rem; display:none;">0</span>
+                </a>
+                {% endif %}
+
+                <a href="#" onclick="toggleNotifPanel(); return false;"
+                   class="nav-link {{ 'active' if active_page == 'alerts' else '' }}">
+                    🔔 Alerts
+                    <span id="sidebar-notif-count"
+                          style="margin-left:auto; background:#e74c3c; color:#fff;
+                                 border-radius:20px; padding:0.1rem 0.5rem;
+                                 font-size:0.7rem; display:none;">
+                        0
+                    </span>
+                </a>
+
+                <a href="{{ url_for('dashboard.export_pdf') }}"
+                   class="nav-link {{ 'active' if active_page == 'export' else '' }}">
+                    📤 Export PDF
+                </a>
+
+            </nav>
+        </div>
+
+        <!-- SIDEBAR FOOTER -->
+        <div>
+            <div class="sidebar-user">
+                <span class="avatar">
+                    {{ (user.name[0] if user and user.name else 'U') | upper }}
+                </span>
+                <div class="user-info">
+                    <span class="user-name">{{ user.name if user else 'User' }}</span>
+                    <span class="user-role">
+                        {{ role | capitalize if role else 'Administrator' }}
+                    </span>
+                </div>
+                <span style="margin-left:auto; color:#7faeff; font-size:0.8rem;">›</span>
+            </div>
+
+            <a href="{{ url_for('auth.logout') }}" class="sidebar-logout">
+                🚪 Logout
+            </a>
+        </div>
+
+    </aside>
+
+    <!-- ================= MAIN CONTENT ================= -->
+    <main class="main-content">
+        <div class="content-wrapper">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+</div>
+
+<!-- ================= FOOTER ================= -->
+<footer class="dashboard-footer">
+    <p>© {{ current_year or 2026 }} AttendanceMS. All rights reserved.</p>
+</footer>
+
+<!-- chart data injected by Jinja — must stay inline -->
+<script>
+window.ATTENDANCE_CHART_DATA = {
+    labels: {{ (chart_data['labels'] if chart_data else []) | tojson | safe }},
+    values: {{ (chart_data['values'] if chart_data else []) | tojson | safe }}
+};
+</script>
+
+<!-- ================= SCRIPTS ================= -->
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% block extra_js %}{% endblock %}
+
+</body>
+</html>

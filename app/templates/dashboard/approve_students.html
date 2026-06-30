@@ -1,0 +1,109 @@
+{% extends "dashboard/base_admin_dashboard.html" %}
+
+{% block title %}Approve Students{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Approve Students</h2>
+    <p>Review pending registrations and approve or reject them.</p>
+</div>
+
+<div class="approval-toolbar" style="display:flex; gap:0.75rem; flex-wrap:wrap; margin-bottom:1rem;">
+    <button type="button" id="approveSelectedBtn" class="btn" style="background:#27ae60; color:white; border:none;">Approve Selected</button>
+    <button type="button" id="rejectSelectedBtn" class="btn" style="background:#e74c3c; color:white; border:none;">Reject Selected</button>
+    <span id="approvalStatus" style="align-self:center; color:#4f46e5; font-weight:600;"></span>
+</div>
+
+<div class="card" style="padding:1rem;">
+    <table style="width:100%; border-collapse:collapse;">
+        <thead>
+            <tr style="border-bottom:1px solid #dbe3ec; text-align:left;">
+                <th style="padding:0.7rem;"><input type="checkbox" id="selectAll"></th>
+                <th style="padding:0.7rem;">Name</th>
+                <th style="padding:0.7rem;">Email</th>
+                <th style="padding:0.7rem;">Role</th>
+                <th style="padding:0.7rem;">Unique ID</th>
+                <th style="padding:0.7rem;">Status</th>
+            </tr>
+        </thead>
+        <tbody id="approvalTableBody">
+            <tr>
+                <td colspan="6" style="padding:1rem; color:#6b7280;">Loading users...</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const approvalStatus = document.getElementById('approvalStatus');
+const approvalTableBody = document.getElementById('approvalTableBody');
+const selectAll = document.getElementById('selectAll');
+
+async function loadUsers() {
+    try {
+        const response = await fetch('{{ url_for("dashboard.pending_students") }}');
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || 'Unable to load users');
+        }
+
+        const users = data.users || [];
+        if (!users.length) {
+            approvalTableBody.innerHTML = '<tr><td colspan="6" style="padding:1rem; color:#6b7280;">No users found.</td></tr>';
+            return;
+        }
+
+        approvalTableBody.innerHTML = users.map(user => `
+            <tr style="border-bottom:1px solid #eef2f7;">
+                <td style="padding:0.7rem;"><input type="checkbox" class="user-checkbox" value="${user.id}"></td>
+                <td style="padding:0.7rem;">${user.name || 'N/A'}</td>
+                <td style="padding:0.7rem;">${user.email || 'N/A'}</td>
+                <td style="padding:0.7rem;">${user.role || 'N/A'}</td>
+                <td style="padding:0.7rem;">${user.unique_id || 'N/A'}</td>
+                <td style="padding:0.7rem;">${user.status || 'pending'}</td>
+            </tr>
+        `).join('');
+    } catch (error) {
+        approvalTableBody.innerHTML = `<tr><td colspan="6" style="padding:1rem; color:#e74c3c;">${error.message}</td></tr>`;
+    }
+}
+
+function getSelectedIds() {
+    return [...document.querySelectorAll('.user-checkbox:checked')].map(cb => Number(cb.value));
+}
+
+async function updateUsers(action) {
+    const ids = getSelectedIds();
+    if (!ids.length) {
+        approvalStatus.textContent = 'Please select at least one user.';
+        return;
+    }
+
+    approvalStatus.textContent = 'Updating...';
+
+    const response = await fetch('{{ url_for("dashboard.approve_students_action") }}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids, action })
+    });
+
+    const data = await response.json();
+    approvalStatus.textContent = data.success ? 'Update completed.' : (data.message || 'Update failed.');
+    if (data.success) {
+        loadUsers();
+    }
+}
+
+selectAll.addEventListener('change', function () {
+    document.querySelectorAll('.user-checkbox').forEach(cb => cb.checked = this.checked);
+});
+
+document.getElementById('approveSelectedBtn').addEventListener('click', () => updateUsers('approved'));
+document.getElementById('rejectSelectedBtn').addEventListener('click', () => updateUsers('rejected'));
+
+loadUsers();
+</script>
+{% endblock %}

@@ -1,0 +1,233 @@
+{% extends "dashboard/base_admin_dashboard.html" %}
+
+{% block title %}Manage Classes{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_teacher.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <h2>Manage Classes</h2>
+    <p>Create classes and assign students to them</p>
+</div>
+
+{% if message %}
+<div class="alert-message" style="margin-bottom:1rem; color:#2ecc71;">{{ message }}</div>
+{% endif %}
+{% if error %}
+<div class="alert-message" style="margin-bottom:1rem; color:#e74c3c;">{{ error }}</div>
+{% endif %}
+
+<!-- CREATE CLASS FORM -->
+<section class="card" style="padding:1.5rem; margin-bottom:1.5rem; max-width:560px;">
+    <h3 style="color:#cde; margin-bottom:1.25rem;">Create New Class</h3>
+
+    <form method="POST" action="{{ url_for('dashboard.create_class') }}">
+
+        <div style="margin-bottom:1rem;">
+            <label style="display:block; color:#8ab4d4; margin-bottom:0.4rem;">Class Name</label>
+            <input type="text" name="name" placeholder="e.g. Year 2 Biology" required
+                   style="width:100%; padding:0.6rem 1rem; border-radius:8px;
+                          background:#0d2137; border:1px solid #1e3a5f; color:#cde;">
+        </div>
+
+        <div style="margin-bottom:1.5rem;">
+            <label style="display:block; color:#8ab4d4; margin-bottom:0.4rem;">Class Code</label>
+            <input type="text" name="code" placeholder="e.g. BIO-202" required
+                   style="width:100%; padding:0.6rem 1rem; border-radius:8px;
+                          background:#0d2137; border:1px solid #1e3a5f; color:#cde;">
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="padding:0.65rem 1.75rem;">
+            Create Class
+        </button>
+
+    </form>
+</section>
+
+<!-- CLASSES LIST -->
+<section class="card" style="padding:1.5rem;">
+    <h3 style="color:#cde; margin-bottom:1.25rem;">All Classes</h3>
+
+    {% if classes %}
+    <div style="display:flex; flex-direction:column; gap:1.25rem;">
+
+        {% for cls in classes %}
+        <div style="border:1px solid #1e3a5f; border-radius:10px; padding:1.25rem;">
+
+            <!-- CLASS HEADER -->
+            <div style="display:flex; justify-content:space-between;
+                        align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
+                <div>
+                    <h4 style="color:#cde; margin:0;">{{ cls.name }}</h4>
+                    <span style="color:#4a6a8a; font-size:0.8rem;">{{ cls.code }}</span>
+                </div>
+                <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+                    <span style="padding:0.25rem 0.75rem; border-radius:20px;
+                                 background:#0d2137; border:1px solid #1e3a5f;
+                                 color:#7faeff; font-size:0.8rem;">
+                        {{ cls.students | length }} student(s)
+                    </span>
+                    <span style="padding:0.25rem 0.75rem; border-radius:20px;
+                                 background:#0d2137; border:1px solid #1e3a5f;
+                                 color:#4a6a8a; font-size:0.8rem;">
+                        Teacher: {{ cls.teacher.name if cls.teacher else 'Auto-assigned' }}
+                    </span>
+                    <a href="{{ url_for('dashboard.start_session') }}"
+                       style="padding:0.35rem 0.9rem; border-radius:6px; background:#1e3a5f;
+                              color:#7faeff; text-decoration:none; font-size:0.85rem;">
+                        ▶️ Start Session
+                    </a>
+
+                    <!-- DELETE CLASS BUTTON -->
+                    <button onclick="confirmDeleteClass({{ cls.id }}, '{{ cls.name }}')"
+                            style="padding:0.35rem 0.9rem; border-radius:6px;
+                                   background:#2a0f0f; border:1px solid #6b1f1f;
+                                   color:#e74c3c; font-size:0.85rem; cursor:pointer;">
+                        🗑 Delete
+                    </button>
+                </div>
+            </div>
+
+            <!-- ASSIGN STUDENTS TO THIS CLASS -->
+            <form method="POST"
+                  action="{{ url_for('dashboard.assign_students_to_class', class_id=cls.id) }}">
+
+                <label style="display:block; color:#8ab4d4; margin-bottom:0.5rem; font-size:0.85rem;">
+                    Assign Students
+                </label>
+
+                <div style="display:flex; gap:0.75rem; align-items:flex-start; flex-wrap:wrap;">
+
+                    <select name="student_ids" multiple
+                            style="flex:1; min-width:220px; padding:0.5rem;
+                                   border-radius:8px; background:#0d2137;
+                                   border:1px solid #1e3a5f; color:#cde;
+                                   min-height:90px; font-size:0.85rem;">
+                        {% for student in all_students %}
+                        <option value="{{ student.id }}"
+                                {{ 'selected' if student.class_id == cls.id else '' }}>
+                            {{ student.name }} ({{ student.unique_id }})
+                            {{ '✓' if student.class_id == cls.id else '' }}
+                        </option>
+                        {% endfor %}
+                    </select>
+
+                    <div style="display:flex; flex-direction:column; gap:0.5rem;">
+                        <button type="submit" class="btn btn-primary"
+                                style="padding:0.5rem 1.25rem; font-size:0.85rem;">
+                            Save
+                        </button>
+                        <span style="color:#4a6a8a; font-size:0.75rem; text-align:center;">
+                            Hold Ctrl/<br>Cmd to<br>select many
+                        </span>
+                    </div>
+
+                </div>
+
+            </form>
+
+            <!-- CURRENT STUDENTS IN CLASS -->
+            {% if cls.students %}
+            <div style="margin-top:1rem; display:flex; flex-wrap:wrap; gap:0.5rem;">
+                {% for s in cls.students %}
+                <span style="padding:0.25rem 0.75rem; border-radius:20px;
+                             background:#0a1c30; border:1px solid #1e3a5f;
+                             color:#8ab4d4; font-size:0.8rem;">
+                    {{ s.name }}
+                </span>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+        </div>
+        {% endfor %}
+
+    </div>
+
+    {% else %}
+    <p style="color:#8ab4d4; text-align:center; padding:2rem;">
+        No classes yet. Create one above.
+    </p>
+    {% endif %}
+
+</section>
+
+<!-- DELETE CONFIRMATION MODAL -->
+<div id="delete-modal"
+     style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6);
+            z-index:9999; align-items:center; justify-content:center;">
+    <div style="background:#0d2137; border:1px solid #1e3a5f; border-radius:14px;
+                padding:2rem; max-width:420px; width:90%; text-align:center;">
+        <div style="font-size:2.5rem; margin-bottom:0.75rem;">🗑</div>
+        <h3 style="color:#e74c3c; margin-bottom:0.5rem;">Delete Class?</h3>
+        <p id="modal-class-name" style="color:#cde; margin-bottom:0.25rem; font-weight:600;"></p>
+        <p style="color:#8ab4d4; font-size:0.9rem; margin-bottom:1.5rem;">
+            This will permanently delete the class and all its sessions and attendance records.
+            This cannot be undone.
+        </p>
+        <div style="display:flex; gap:1rem; justify-content:center;">
+            <button onclick="closeModal()"
+                    style="padding:0.6rem 1.5rem; border-radius:8px; border:1px solid #1e3a5f;
+                           background:#0a1c30; color:#8ab4d4; cursor:pointer; font-size:0.9rem;">
+                Cancel
+            </button>
+            <button id="confirm-delete-btn"
+                    style="padding:0.6rem 1.5rem; border-radius:8px; border:none;
+                           background:#e74c3c; color:#fff; cursor:pointer;
+                           font-size:0.9rem; font-weight:600;">
+                Yes, Delete
+            </button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let pendingDeleteId = null;
+
+function confirmDeleteClass(classId, className) {
+    pendingDeleteId = classId;
+    document.getElementById('modal-class-name').textContent = className;
+    const modal = document.getElementById('delete-modal');
+    modal.style.display = 'flex';
+
+    document.getElementById('confirm-delete-btn').onclick = function () {
+        this.textContent = 'Deleting...';
+        this.disabled    = true;
+
+        fetch(`/dashboard/classes/${pendingDeleteId}/delete`, {
+            method : 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert(data.error || 'Delete failed. Please try again.');
+                closeModal();
+            }
+        })
+        .catch(() => {
+            alert('Network error. Please try again.');
+            closeModal();
+        });
+    };
+}
+
+function closeModal() {
+    document.getElementById('delete-modal').style.display = 'none';
+    pendingDeleteId = null;
+}
+
+// close modal on backdrop click
+document.getElementById('delete-modal').addEventListener('click', function (e) {
+    if (e.target === this) closeModal();
+});
+</script>
+{% endblock %}

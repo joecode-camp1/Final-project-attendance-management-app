@@ -1,0 +1,152 @@
+{% extends "dashboard/base_admin_dashboard.html" %}
+
+{% block title %}Live Alerts{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_teacher.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <h2>Live Alerts & Notifications</h2>
+    <p>Real-time attendance activity across all classes</p>
+</div>
+
+<!-- STATS ROW -->
+<section class="extra-widgets" style="margin-bottom:1.5rem;">
+
+    <div class="widget-card">
+        <span class="widget-icon">🔔</span>
+        <h3>Total Alerts</h3>
+        <p id="total-alerts">{{ alerts | default([]) | length }}</p>
+    </div>
+
+    <div class="widget-card">
+        <span class="widget-icon">🚫</span>
+        <h3>Absences</h3>
+        <p id="total-absences">{{ alerts | default([]) | selectattr('type', 'equalto', 'absent') | list | length }}</p>
+    </div>
+
+    <div class="widget-card">
+        <span class="widget-icon">⏰</span>
+        <h3>Late Arrivals</h3>
+        <p id="total-late">{{ alerts | default([]) | selectattr('type', 'equalto', 'late') | list | length }}</p>
+    </div>
+
+    <div class="widget-card">
+        <span class="widget-icon">✅</span>
+        <h3>Present</h3>
+        <p id="total-present">{{ alerts | default([]) | selectattr('type', 'equalto', 'present') | list | length }}</p>
+    </div>
+
+</section>
+
+<!-- FILTER BAR -->
+<section class="card" style="padding:1.25rem 1.5rem; margin-bottom:1.5rem; display:flex; gap:1rem; align-items:center; flex-wrap:wrap;">
+    <div style="flex:1; min-width:220px;">
+        <label style="color:#8ab4d4; display:block; margin-bottom:0.5rem;">Filter by type</label>
+        <select id="alertTypeFilter" style="width:100%; padding:0.75rem 1rem; border-radius:10px; background:#0d2137; border:1px solid #1e3a5f; color:#cde;">
+            <option value="all">All Alerts</option>
+            <option value="present">Present</option>
+            <option value="absent">Absent</option>
+            <option value="late">Late</option>
+            <option value="session">Session</option>
+        </select>
+    </div>
+
+    <div style="flex:1; min-width:220px;">
+        <label style="color:#8ab4d4; display:block; margin-bottom:0.5rem;">Search</label>
+        <input id="alertSearch" type="search" placeholder="Search alerts..." style="width:100%; padding:0.75rem 1rem; border-radius:10px; background:#0d2137; border:1px solid #1e3a5f; color:#cde;">
+    </div>
+
+    <button id="refreshAlerts" class="btn export" style="padding:0.8rem 1.5rem; border-radius:10px;">
+        🔄 Refresh
+    </button>
+</section>
+
+<section class="card" style="padding:1.5rem;">
+    <h3>Recent Notifications</h3>
+    <div id="alertList" style="margin-top:1rem; display:grid; gap:1rem;"></div>
+    <div id="emptyState" style="color:#8ab4d4; text-align:center; padding:2rem; display:none;">
+        No alerts found.
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const alertList = document.getElementById('alertList');
+    const emptyState = document.getElementById('emptyState');
+    const typeFilter = document.getElementById('alertTypeFilter');
+    const searchInput = document.getElementById('alertSearch');
+    const totalAlerts = document.getElementById('total-alerts');
+    const totalAbsences = document.getElementById('total-absences');
+    const totalLate = document.getElementById('total-late');
+    const totalPresent = document.getElementById('total-present');
+
+    let alertsData = [];
+
+    function renderAlerts(data) {
+        const type = typeFilter.value;
+        const query = searchInput.value.trim().toLowerCase();
+        const filtered = data.filter(alert => {
+            const matchesType = type === 'all' || alert.type === type;
+            const text = alert.text.toLowerCase();
+            const matchesSearch = !query || text.includes(query) || alert.class_name.toLowerCase().includes(query);
+            return matchesType && matchesSearch;
+        });
+
+        alertList.innerHTML = '';
+        if (!filtered.length) {
+            emptyState.style.display = 'block';
+            return;
+        }
+        emptyState.style.display = 'none';
+
+        filtered.forEach(alert => {
+            const card = document.createElement('div');
+            card.style.background = '#0c1830';
+            card.style.border = '1px solid #1e3a5f';
+            card.style.borderRadius = '14px';
+            card.style.padding = '1rem';
+            card.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:1rem;">
+                    <div>
+                        <strong style="color:#cde;">${alert.text}</strong>
+                        <div style="color:#7faeff; font-size:0.92rem; margin-top:0.45rem;">${alert.class_name || ''}</div>
+                    </div>
+                    <span style="color:${alert.type === 'absent' ? '#e74c3c' : alert.type === 'late' ? '#f39c12' : alert.type === 'present' ? '#2ecc71' : '#7faeff'}; font-weight:700; text-transform:capitalize;">${alert.type}</span>
+                </div>
+                <div style="margin-top:0.75rem; color:#8ab4d4; font-size:0.9rem;">${alert.time_ago}</div>
+            `;
+            alertList.appendChild(card);
+        });
+    }
+
+    async function loadAlerts() {
+        try {
+            const res = await fetch('/dashboard/live-notifications');
+            const data = await res.json();
+            alertsData = data.alerts || [];
+
+            totalAlerts.textContent = data.counts?.total ?? alertsData.length;
+            totalAbsences.textContent = data.counts?.absent ?? alertsData.filter(a => a.type === 'absent').length;
+            totalLate.textContent = data.counts?.late ?? alertsData.filter(a => a.type === 'late').length;
+            totalPresent.textContent = data.counts?.present ?? alertsData.filter(a => a.type === 'present').length;
+
+            renderAlerts(alertsData);
+        } catch (error) {
+            console.error('Unable to load alerts', error);
+            alertList.innerHTML = '<p style="color:#e74c3c; text-align:center;">Unable to load alerts.</p>';
+        }
+    }
+
+    document.getElementById('refreshAlerts').addEventListener('click', loadAlerts);
+    typeFilter.addEventListener('change', () => renderAlerts(alertsData));
+    searchInput.addEventListener('input', () => renderAlerts(alertsData));
+
+    loadAlerts();
+</script>
+{% endblock %}

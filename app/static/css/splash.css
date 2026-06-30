@@ -1,0 +1,312 @@
+/* ==========================================
+   RESET
+========================================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+
+    font-family:"Segoe UI",sans-serif;
+
+    height:100vh;
+
+    overflow:hidden;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    background:
+    radial-gradient(circle at top,#2b66c4 0%,#122746 45%,#08131f 100%);
+
+    transition:opacity .8s;
+
+}
+
+/* ==========================================
+   STARS
+========================================== */
+
+.stars{
+
+    position:fixed;
+
+    inset:0;
+
+    background-image:
+    radial-gradient(white 1px,transparent 1px);
+
+    background-size:90px 90px;
+
+    opacity:.15;
+
+    animation:starsMove 45s linear infinite;
+
+}
+
+@keyframes starsMove{
+
+    from{
+        transform:translateY(0);
+    }
+
+    to{
+        transform:translateY(-90px);
+    }
+
+}
+
+/* ==========================================
+   MAIN CONTAINER
+========================================== */
+
+.splash-container{
+
+    text-align:center;
+
+    z-index:5;
+
+    animation:fadeUp 1s ease;
+
+}
+
+/* ==========================================
+   LOGO
+========================================== */
+
+.logo-container{
+
+    position:relative;
+
+    width:230px;
+
+    height:230px;
+
+    margin:auto;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+}
+
+.glow-ring{
+
+    position:absolute;
+
+    width:220px;
+
+    height:220px;
+
+    border-radius:50%;
+
+    background:
+    radial-gradient(circle,
+    rgba(72,149,255,.5),
+    transparent 70%);
+
+    filter:blur(20px);
+
+    animation:pulseGlow 3s infinite;
+
+}
+
+.logo{
+
+    width:175px;
+
+    height:175px;
+
+    object-fit:cover;
+
+    border-radius:24px;
+
+    padding:10px;
+
+    background:rgba(255,255,255,.08);
+
+    border:1px solid rgba(255,255,255,.15);
+
+    backdrop-filter:blur(12px);
+
+    box-shadow:
+    0 20px 40px rgba(0,0,0,.35);
+
+    animation:floatLogo 4s ease-in-out infinite;
+
+}
+
+/* ==========================================
+   TITLE
+========================================== */
+
+.title{
+
+    margin-top:35px;
+
+    font-size:3rem;
+
+    font-weight:800;
+
+    color:white;
+
+    letter-spacing:1px;
+
+    text-shadow:
+    0 0 20px rgba(68,150,255,.55);
+
+}
+
+/* ==========================================
+   SUBTITLE
+========================================== */
+
+.subtitle{
+
+    margin-top:15px;
+
+    color:#bcd7ff;
+
+    font-size:1.1rem;
+
+    letter-spacing:4px;
+
+    text-transform:uppercase;
+
+}
+
+/* ==========================================
+   LOADER
+========================================== */
+
+.loader{
+
+    margin-top:50px;
+
+    display:flex;
+
+    justify-content:center;
+
+    gap:14px;
+
+}
+
+.loader span{
+
+    width:14px;
+
+    height:14px;
+
+    background:#4f9dff;
+
+    border-radius:50%;
+
+    animation:bounce 1s infinite;
+
+}
+
+.loader span:nth-child(2){
+
+    animation-delay:.2s;
+
+}
+
+.loader span:nth-child(3){
+
+    animation-delay:.4s;
+
+}
+
+/* ==========================================
+   ANIMATIONS
+========================================== */
+
+@keyframes floatLogo{
+
+    0%,100%{
+
+        transform:translateY(0);
+
+    }
+
+    50%{
+
+        transform:translateY(-10px);
+
+    }
+
+}
+
+@keyframes pulseGlow{
+
+    0%,100%{
+
+        transform:scale(1);
+
+        opacity:.45;
+
+    }
+
+    50%{
+
+        transform:scale(1.08);
+
+        opacity:1;
+
+    }
+
+}
+
+@keyframes bounce{
+
+    0%,80%,100%{
+
+        transform:scale(.5);
+
+        opacity:.5;
+
+    }
+
+    40%{
+
+        transform:scale(1.4);
+
+        opacity:1;
+
+    }
+
+}
+
+@keyframes fadeUp{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(40px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+
+    }
+
+}
+
+.fade-out{
+
+    opacity:0;
+
+}

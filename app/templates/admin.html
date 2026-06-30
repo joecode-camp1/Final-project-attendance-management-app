@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard - AttendanceMS</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+
+<body>
+
+<!-- ================= NAVBAR ================= -->
+<nav class="admin-navbar">
+    <div class="logo">
+        AttendanceMS Admin
+    </div>
+
+    <ul>
+        <li><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
+        <li><a href="{{ url_for('admin.all_users') }}">All Users</a></li>
+        <li><a href="{{ url_for('admin.reports') }}">Reports</a></li>
+    </ul>
+</nav>
+
+
+<!-- ================= MAIN CONTENT ================= -->
+<div class="admin-container">
+
+    <!-- ================= PENDING USERS ================= -->
+    <section class="card-section">
+        <h2>Pending Approvals</h2>
+
+        {% for user in pending_users %}
+        <div class="user-card">
+
+            <div>
+                <h3>{{ user.name }}</h3>
+                <p>{{ user.email }} | {{ user.role }}</p>
+            </div>
+
+            <div class="actions">
+                <a class="btn-approve"
+                   href="{{ url_for('admin.approve_user', user_id=user.id) }}">
+                   Approve
+                </a>
+
+                <a class="btn-reject"
+                   href="{{ url_for('admin.reject_user', user_id=user.id) }}">
+                   Reject
+                </a>
+            </div>
+
+        </div>
+        {% endfor %}
+    </section>
+
+
+    <!-- ================= TEACHERS ================= -->
+    <section class="card-section">
+        <h2>Teachers</h2>
+
+        {% for user in teachers %}
+        <div class="user-card">
+
+            <div>
+                <h3>{{ user.name }}</h3>
+                <p>{{ user.email }}</p>
+            </div>
+
+            <form method="POST"
+                  action="{{ url_for('admin.assign_class', user_id=user.id) }}">
+
+                <select name="class_id" required>
+                    {% for class in classes %}
+                        <option value="{{ class.id }}">{{ class.name }}</option>
+                    {% endfor %}
+                </select>
+
+                <button type="submit">Assign</button>
+            </form>
+
+        </div>
+        {% endfor %}
+    </section>
+
+
+    <!-- ================= STUDENTS ================= -->
+    <section class="card-section">
+        <h2>Students</h2>
+
+        {% for user in students %}
+        <div class="user-card">
+
+            <div>
+                <h3>{{ user.name }}</h3>
+                <p>{{ user.email }}</p>
+            </div>
+
+            <div class="meta">
+                <span>Class: {{ user.class_id or "Not Assigned" }}</span>
+            </div>
+
+        </div>
+        {% endfor %}
+    </section>
+
+
+    <!-- ================= REPORTS ================= -->
+    <section class="card-section">
+        <h2>Reports</h2>
+
+        <div class="report-box">
+            <p>View attendance analytics, class performance, and student reports.</p>
+
+            <a href="{{ url_for('admin.reports') }}" class="btn-primary">
+                Open Reports
+            </a>
+        </div>
+    </section>
+
+</div>
+
+</body>
+</html>

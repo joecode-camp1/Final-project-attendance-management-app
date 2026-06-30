@@ -1,0 +1,146 @@
+/* ================= ADMIN NAVBAR ================= */
+
+.admin-navbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    padding:15px 30px;
+
+    background:
+        linear-gradient(135deg, #0b1b2e, #050b18);
+
+    border-bottom:1px solid rgba(46,168,255,.2);
+
+    color:white;
+}
+
+.admin-navbar ul{
+    list-style:none;
+    display:flex;
+    gap:20px;
+}
+
+.admin-navbar a{
+    color:rgba(255,255,255,.75);
+    text-decoration:none;
+}
+
+.admin-navbar a:hover{
+    color:#fff;
+    text-shadow:0 0 10px #2ea8ff;
+}
+
+
+/* ================= CONTAINER ================= */
+
+.admin-container{
+    padding:30px;
+    max-width:1200px;
+    margin:auto;
+}
+
+
+/* ================= SECTIONS ================= */
+
+.card-section{
+    margin-bottom:30px;
+}
+
+.card-section h2{
+    color:white;
+    margin-bottom:15px;
+}
+
+
+/* ================= USER CARD ================= */
+
+.user-card{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    padding:15px;
+
+    margin-bottom:10px;
+
+    background:rgba(255,255,255,.04);
+
+    border:1px solid rgba(255,255,255,.08);
+
+    border-radius:12px;
+
+    backdrop-filter:blur(10px);
+}
+
+.user-card h3{
+    margin:0;
+    color:white;
+}
+
+.user-card p{
+    margin:3px 0;
+    color:rgba(255,255,255,.7);
+}
+
+
+/* ================= BUTTONS ================= */
+
+.btn-approve{
+    background:#2ea8ff;
+    padding:8px 12px;
+    border-radius:8px;
+    color:white;
+    text-decoration:none;
+}
+
+.btn-reject{
+    background:#ff4d4d;
+    padding:8px 12px;
+    border-radius:8px;
+    color:white;
+    text-decoration:none;
+}
+
+button{
+    background:#2ea8ff;
+    border:none;
+    padding:8px 12px;
+    border-radius:8px;
+    color:white;
+    cursor:pointer;
+}
+
+select{
+    padding:8px;
+    border-radius:8px;
+    background:#0b1b2e;
+    color:white;
+    border:1px solid rgba(255,255,255,.1);
+}
+
+
+/* ================= REPORT BOX ================= */
+
+.report-box{
+    padding:20px;
+
+    background:rgba(255,255,255,.04);
+
+    border:1px solid rgba(255,255,255,.08);
+
+    border-radius:12px;
+
+    color:rgba(255,255,255,.7);
+}
+
+.btn-primary{
+    display:inline-block;
+    margin-top:10px;
+
+    background:#2ea8ff;
+    padding:10px 14px;
+    border-radius:10px;
+    color:white;
+    text-decoration:none;
+}

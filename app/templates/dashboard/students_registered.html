@@ -1,0 +1,202 @@
+{% extends "dashboard/base_admin_dashboard.html" %}
+
+{% block title %}Students{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_teacher.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <h2>Registered Students</h2>
+    <p>All students registered in the system</p>
+</div>
+
+<!-- FLASH MESSAGES -->
+{% if message %}
+<div class="alert-message" style="margin-bottom:1rem; color:#2ecc71;">{{ message }}</div>
+{% endif %}
+{% if error %}
+<div class="alert-message" style="margin-bottom:1rem;">{{ error }}</div>
+{% endif %}
+
+<!-- STATS ROW -->
+<section class="extra-widgets" style="margin-bottom:1.5rem;">
+    <div class="widget-card">
+        <span class="widget-icon">👥</span>
+        <h3>Total Students</h3>
+        <p>{{ students | length }}</p>
+    </div>
+    <div class="widget-card">
+        <span class="widget-icon">✅</span>
+        <h3>Assigned to Class</h3>
+        <p>{{ students | selectattr('class_id') | list | length }}</p>
+    </div>
+    <div class="widget-card">
+        <span class="widget-icon">⚠️</span>
+        <h3>Unassigned</h3>
+        <p>{{ students | rejectattr('class_id') | list | length }}</p>
+    </div>
+    <div class="widget-card">
+        <span class="widget-icon">📋</span>
+        <h3>Total Classes</h3>
+        <p>{{ classes | length }}</p>
+    </div>
+</section>
+
+<!-- SEARCH + FILTER -->
+<section class="card" style="padding:1.25rem 1.5rem; margin-bottom:1.5rem;
+                              display:flex; gap:1rem; align-items:center; flex-wrap:wrap;">
+    <input type="text" id="studentSearch" placeholder="Search by name or ID..."
+           style="flex:1; min-width:200px; padding:0.6rem 1rem; border-radius:8px;
+                  background:#0d2137; border:1px solid #1e3a5f; color:#cde;">
+
+    <select id="classFilter"
+            style="padding:0.6rem 1rem; border-radius:8px;
+                   background:#0d2137; border:1px solid #1e3a5f; color:#cde;">
+        <option value="">All Classes</option>
+        {% for cls in classes %}
+        <option value="{{ cls.id }}">{{ cls.name }}</option>
+        {% endfor %}
+        <option value="none">Unassigned</option>
+    </select>
+</section>
+
+<!-- STUDENTS TABLE -->
+<section class="card" style="padding:1.5rem;">
+
+    {% if students %}
+    <table style="width:100%; border-collapse:collapse;" id="studentsTable">
+        <thead>
+            <tr style="text-align:left; border-bottom:1px solid #1e3a5f; color:#8ab4d4;">
+                <th style="padding:0.75rem;">Name</th>
+                <th style="padding:0.75rem;">ID</th>
+                <th style="padding:0.75rem;">Email</th>
+                <th style="padding:0.75rem;">Class</th>
+                <th style="padding:0.75rem;">Attendance</th>
+                <th style="padding:0.75rem;">Joined</th>
+                <th style="padding:0.75rem;">Assign Class</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+            <tr style="border-bottom:1px solid #0f2540; color:#cde;"
+                data-name="{{ student.name | lower }}"
+                data-uid="{{ student.unique_id | lower }}"
+                data-class="{{ student.class_id or 'none' }}">
+
+                <td style="padding:0.75rem;">
+                    <div style="display:flex; align-items:center; gap:0.6rem;">
+                        <span style="width:32px; height:32px; border-radius:50%;
+                                     background:#1e3a5f; display:flex; align-items:center;
+                                     justify-content:center; font-weight:600; color:#7faeff;">
+                            {{ student.name[0] | upper }}
+                        </span>
+                        {{ student.name }}
+                    </div>
+                </td>
+
+                <td style="padding:0.75rem; color:#8ab4d4; font-size:0.85rem;">
+                    {{ student.unique_id }}
+                </td>
+
+                <td style="padding:0.75rem; color:#8ab4d4; font-size:0.85rem;">
+                    {{ student.email }}
+                </td>
+
+                <td style="padding:0.75rem;">
+                    {% if student.class_assigned %}
+                        <span style="padding:0.25rem 0.75rem; border-radius:20px;
+                                     background:#0d2137; border:1px solid #1e3a5f;
+                                     color:#7faeff; font-size:0.8rem;">
+                            {{ student.class_assigned.name }}
+                        </span>
+                    {% else %}
+                        <span style="color:#4a6a8a; font-size:0.85rem;">Unassigned</span>
+                    {% endif %}
+                </td>
+
+                <td style="padding:0.75rem;">
+                    {% set rate = attendance_rates.get(student.id, 0) %}
+                    <div style="display:flex; align-items:center; gap:0.5rem;">
+                        <div style="width:60px; height:6px; border-radius:3px; background:#0d2137;">
+                            <div style="width:{{ rate }}%; height:100%; border-radius:3px;
+                                        background:{{ '#2ecc71' if rate >= 75 else '#f39c12' if rate >= 50 else '#e74c3c' }};"></div>
+                        </div>
+                        <span style="font-size:0.85rem; color:#8ab4d4;">{{ rate }}%</span>
+                    </div>
+                </td>
+
+                <td style="padding:0.75rem; color:#4a6a8a; font-size:0.8rem;">
+                    {{ student.created_at.strftime('%b %d, %Y') if student.created_at else '—' }}
+                </td>
+
+                <!-- ASSIGN CLASS FORM -->
+                <td style="padding:0.75rem;">
+                    <form method="POST"
+                          action="{{ url_for('dashboard.assign_student_class', student_id=student.id) }}"
+                          style="display:flex; gap:0.5rem; align-items:center;">
+                        <select name="class_id"
+                                style="padding:0.35rem 0.6rem; border-radius:6px;
+                                       background:#0d2137; border:1px solid #1e3a5f;
+                                       color:#cde; font-size:0.85rem;">
+                            <option value="">— None —</option>
+                            {% for cls in classes %}
+                            <option value="{{ cls.id }}"
+                                    {{ 'selected' if student.class_id == cls.id else '' }}>
+                                {{ cls.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit"
+                                style="padding:0.35rem 0.75rem; border-radius:6px;
+                                       background:#1e3a5f; border:none; color:#7faeff;
+                                       cursor:pointer; font-size:0.85rem;">
+                            Save
+                        </button>
+                    </form>
+                </td>
+
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% else %}
+    <p style="color:#8ab4d4; text-align:center; padding:2rem;">
+        No students registered yet.
+    </p>
+    {% endif %}
+
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // ── Live search + class filter ─────────────────────────
+    const searchInput  = document.getElementById('studentSearch');
+    const classFilter  = document.getElementById('classFilter');
+    const rows         = document.querySelectorAll('#studentsTable tbody tr');
+
+    function filterTable() {
+        const query    = searchInput.value.toLowerCase();
+        const classVal = classFilter.value;
+
+        rows.forEach(row => {
+            const name    = row.dataset.name  || '';
+            const uid     = row.dataset.uid   || '';
+            const classId = row.dataset.class || 'none';
+
+            const matchesSearch = name.includes(query) || uid.includes(query);
+            const matchesClass  = !classVal || classId === classVal;
+
+            row.style.display = matchesSearch && matchesClass ? '' : 'none';
+        });
+    }
+
+    searchInput.addEventListener('input', filterTable);
+    classFilter.addEventListener('change', filterTable);
+</script>
+{% endblock %}

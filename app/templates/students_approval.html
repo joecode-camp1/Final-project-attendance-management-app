@@ -1,0 +1,125 @@
+{% extends "dashboard/base_admin_dashboard.html" %}
+
+{% block title %}Approve Students – AttendanceMS{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <h2>✅ Approve Students</h2>
+    <p>Review and manage pending sign-up requests</p>
+</div>
+
+<!-- STAT PILLS -->
+<div class="approve-stats">
+    <div class="stat-pill pending">
+        <span class="pill-num" id="count-pending">0</span>
+        <span class="pill-label">Pending</span>
+    </div>
+    <div class="stat-pill approved">
+        <span class="pill-num" id="count-approved">0</span>
+        <span class="pill-label">Approved</span>
+    </div>
+    <div class="stat-pill rejected">
+        <span class="pill-num" id="count-rejected">0</span>
+        <span class="pill-label">Rejected</span>
+    </div>
+    <div class="stat-pill">
+        <span class="pill-num" id="count-total">0</span>
+        <span class="pill-label">Total</span>
+    </div>
+</div>
+
+<!-- FILTER BAR -->
+<div class="approve-controls">
+    <input type="text" id="studentSearch" placeholder="🔍  Search by name or email…">
+    <select id="statusFilter">
+        <option value="pending">Pending</option>
+        <option value="approved">Approved</option>
+        <option value="rejected">Rejected</option>
+        <option value="all">All</option>
+    </select>
+    <select id="roleFilter">
+        <option value="all">All Roles</option>
+        <option value="student">Student</option>
+        <option value="teacher">Teacher</option>
+        <option value="admin">Admin</option>
+    </select>
+</div>
+
+<!-- TABLE CARD -->
+<div class="approve-card">
+
+    <div class="approve-bulk-bar" id="bulkBar">
+        <span id="bulkLabel">0 selected</span>
+        <button class="btn-bulk-approve" onclick="bulkAction('approved')">✅ Approve Selected</button>
+        <button class="btn-bulk-reject"  onclick="bulkAction('rejected')">✗ Reject Selected</button>
+    </div>
+
+    <table class="approve-table">
+        <thead>
+            <tr>
+                <th class="col-check"><input type="checkbox" id="selectAll" title="Select all"></th>
+                <th>User</th>
+                <th>Role</th>
+                <th>Joined</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="studentTableBody"></tbody>
+    </table>
+
+    <div class="approve-empty" id="emptyState" style="display:none;">
+        <span class="approve-empty-icon">🎓</span>
+        <p>No users match this filter.</p>
+    </div>
+
+    <div class="approve-pagination" id="paginationBar">
+        <span class="approve-page-info" id="pageInfo">Loading…</span>
+        <button class="approve-page-btn" id="prevPage" onclick="changePage(-1)" disabled>‹ Prev</button>
+        <span id="pageButtons"></span>
+        <button class="approve-page-btn" id="nextPage" onclick="changePage(1)">Next ›</button>
+    </div>
+
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="approve-modal-overlay" id="studentModal">
+    <div class="approve-modal-box">
+        <h3>User Details</h3>
+        <div class="approve-modal-row">
+            <span class="approve-modal-label">Name</span>
+            <span class="approve-modal-value" id="m-name"></span>
+        </div>
+        <div class="approve-modal-row">
+            <span class="approve-modal-label">Email</span>
+            <span class="approve-modal-value" id="m-email"></span>
+        </div>
+        <div class="approve-modal-row">
+            <span class="approve-modal-label">Role</span>
+            <span class="approve-modal-value" id="m-role"></span>
+        </div>
+        <div class="approve-modal-row">
+            <span class="approve-modal-label">Unique ID</span>
+            <span class="approve-modal-value" id="m-uid"></span>
+        </div>
+        <div class="approve-modal-row">
+            <span class="approve-modal-label">Joined</span>
+            <span class="approve-modal-value" id="m-joined"></span>
+        </div>
+        <div class="approve-modal-row">
+            <span class="approve-modal-label">Status</span>
+            <span class="approve-modal-value" id="m-status"></span>
+        </div>
+        <div class="approve-modal-actions">
+            <button class="btn-modal-close" onclick="closeModal()">Close</button>
+            <button class="btn-approve" id="m-approve-btn" onclick="modalAction('approved')">✅ Approve</button>
+            <button class="btn-reject"  id="m-reject-btn"  onclick="modalAction('rejected')">✗ Reject</button>
+        </div>
+    </div>
+</div>
+
+<!-- TOAST -->
+<div id="approve-toast"></div>
+
+{% endblock %}

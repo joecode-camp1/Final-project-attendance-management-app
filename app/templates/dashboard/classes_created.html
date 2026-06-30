@@ -1,0 +1,178 @@
+{% extends "dashboard/base_admin_dashboard.html" %}
+
+{% block title %}Sessions{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_teacher.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <h2>Attendance Sessions</h2>
+    <p>All sessions created by teachers and admins</p>
+</div>
+
+<div style="margin-bottom:1.5rem;">
+    <a href="{{ url_for('dashboard.start_session') }}" class="btn export"
+       style="padding:0.6rem 1.5rem; text-decoration:none;">
+        ▶️ Start New Session
+    </a>
+</div>
+
+<section class="card" style="padding:1.5rem;">
+
+    {% if sessions %}
+    <table style="width:100%; border-collapse:collapse;">
+        <thead>
+            <tr style="text-align:left; border-bottom:1px solid #1e3a5f; color:#8ab4d4;">
+                <th style="padding:0.75rem;">Class</th>
+                <th style="padding:0.75rem;">Date</th>
+                <th style="padding:0.75rem;">Start Time</th>
+                <th style="padding:0.75rem;">Location</th>
+                <th style="padding:0.75rem;">Teacher</th>
+                <th style="padding:0.75rem;">Records</th>
+                <th style="padding:0.75rem;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in sessions %}
+            <tr style="border-bottom:1px solid #0f2540; color:#cde;">
+
+                <td style="padding:0.75rem;">
+                    {{ s.class_.name if s.class_ else '—' }}
+                </td>
+
+                <td style="padding:0.75rem;">
+                    {{ s.date.strftime('%b %d, %Y') }}
+                </td>
+
+                <td style="padding:0.75rem;">
+                    {{ s.start_time.strftime('%I:%M %p') }}
+                </td>
+
+                <td style="padding:0.75rem; color:#8ab4d4;">
+                    {{ s.location or '—' }}
+                </td>
+
+                <td style="padding:0.75rem; color:#8ab4d4;">
+                    {{ s.teacher.name if s.teacher else '—' }}
+                </td>
+
+                <td style="padding:0.75rem;">
+                    {{ s.records | length }}
+                    <span style="color:#4a6a8a; font-size:0.8rem;">student(s)</span>
+                </td>
+
+                <td style="padding:0.75rem;">
+                    <div style="display:flex; gap:0.5rem; align-items:center;">
+                        <!-- MARK / EDIT ATTENDANCE -->
+                        <a href="{{ url_for('dashboard.mark_attendance_session', session_id=s.id) }}"
+                           style="padding:0.4rem 1rem; border-radius:6px; background:#1e3a5f;
+                                  color:#7faeff; text-decoration:none; font-size:0.85rem;">
+                            {{ 'Edit' if s.records | length > 0 else 'Mark' }} Attendance
+                        </a>
+
+                        <!-- DELETE SESSION -->
+                        <button onclick="confirmDeleteSession({{ s.id }}, '{{ s.class_.name if s.class_ else 'Session' }}', '{{ s.date.strftime('%b %d, %Y') }}')"
+                                style="padding:0.4rem 0.85rem; border-radius:6px;
+                                       background:#2a0f0f; border:1px solid #6b1f1f;
+                                       color:#e74c3c; font-size:0.85rem; cursor:pointer;">
+                            🗑
+                        </button>
+                    </div>
+                </td>
+
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% else %}
+    <p style="color:#8ab4d4; text-align:center; padding:2rem;">
+        No sessions yet.
+        <a href="{{ url_for('dashboard.start_session') }}"
+           style="color:#4f8ef7; margin-left:0.5rem;">Start one →</a>
+    </p>
+    {% endif %}
+
+</section>
+
+<!-- DELETE SESSION MODAL -->
+<div id="delete-session-modal"
+     style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6);
+            z-index:9999; align-items:center; justify-content:center;">
+    <div style="background:#0d2137; border:1px solid #1e3a5f; border-radius:14px;
+                padding:2rem; max-width:420px; width:90%; text-align:center;">
+        <div style="font-size:2.5rem; margin-bottom:0.75rem;">🗑</div>
+        <h3 style="color:#e74c3c; margin-bottom:0.5rem;">Delete Session?</h3>
+        <p id="modal-session-name" style="color:#cde; margin-bottom:0.25rem; font-weight:600;"></p>
+        <p style="color:#8ab4d4; font-size:0.9rem; margin-bottom:1.5rem;">
+            This will permanently delete the session and all its attendance records.
+            This cannot be undone.
+        </p>
+        <div style="display:flex; gap:1rem; justify-content:center;">
+            <button onclick="closeSessionModal()"
+                    style="padding:0.6rem 1.5rem; border-radius:8px; border:1px solid #1e3a5f;
+                           background:#0a1c30; color:#8ab4d4; cursor:pointer; font-size:0.9rem;">
+                Cancel
+            </button>
+            <button id="confirm-delete-session-btn"
+                    style="padding:0.6rem 1.5rem; border-radius:8px; border:none;
+                           background:#e74c3c; color:#fff; cursor:pointer;
+                           font-size:0.9rem; font-weight:600;">
+                Yes, Delete
+            </button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let pendingSessionId = null;
+
+function confirmDeleteSession(sessionId, className, date) {
+    pendingSessionId = sessionId;
+    document.getElementById('modal-session-name').textContent = `${className} — ${date}`;
+    const modal = document.getElementById('delete-session-modal');
+    modal.style.display = 'flex';
+
+    document.getElementById('confirm-delete-session-btn').onclick = function () {
+        this.textContent = 'Deleting...';
+        this.disabled    = true;
+
+        fetch(`/dashboard/sessions/${pendingSessionId}/delete`, {
+            method : 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert(data.error || 'Delete failed. Please try again.');
+                closeSessionModal();
+            }
+        })
+        .catch(() => {
+            alert('Network error. Please try again.');
+            closeSessionModal();
+        });
+    };
+}
+
+function closeSessionModal() {
+    document.getElementById('delete-session-modal').style.display = 'none';
+    pendingSessionId = null;
+    const btn = document.getElementById('confirm-delete-session-btn');
+    btn.textContent = 'Yes, Delete';
+    btn.disabled    = false;
+}
+
+document.getElementById('delete-session-modal').addEventListener('click', function (e) {
+    if (e.target === this) closeSessionModal();
+});
+</script>
+{% endblock %}

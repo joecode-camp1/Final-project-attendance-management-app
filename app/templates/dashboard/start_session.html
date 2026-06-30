@@ -1,0 +1,82 @@
+{% extends "dashboard/base_admin_dashboard.html" %}
+
+{% block title %}Start Session{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_teacher.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <h2>Start Attendance Session</h2>
+    <p>Create a new session to begin marking attendance</p>
+</div>
+
+{% if error %}
+<div class="alert-message" style="margin-bottom:1rem;">{{ error }}</div>
+{% endif %}
+
+<section class="card" style="margin-top:1.5rem; padding:2rem; max-width:600px;">
+
+    <form method="POST" action="{{ url_for('dashboard.start_session') }}">
+
+        <!-- CLASS -->
+        <div class="form-group" style="margin-bottom:1.25rem;">
+            <label style="display:block; color:#8ab4d4; margin-bottom:0.4rem;">Class</label>
+            <select name="class_id" required
+                    style="width:100%; padding:0.6rem 1rem; border-radius:8px;
+                           background:#0d2137; border:1px solid #1e3a5f; color:#cde;">
+                <option value="">— Select a class —</option>
+                {% for cls in classes %}
+                <option value="{{ cls.id }}">{{ cls.name }} ({{ cls.code }})</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- DATE -->
+        <div class="form-group" style="margin-bottom:1.25rem;">
+            <label style="display:block; color:#8ab4d4; margin-bottom:0.4rem;">Date</label>
+            <input type="date" name="date" required
+                   value="{{ today }}"
+                   style="width:100%; padding:0.6rem 1rem; border-radius:8px;
+                          background:#0d2137; border:1px solid #1e3a5f; color:#cde;">
+        </div>
+
+        <!-- START TIME -->
+        <div class="form-group" style="margin-bottom:1.25rem;">
+            <label style="display:block; color:#8ab4d4; margin-bottom:0.4rem;">Start Time</label>
+            <input type="time" name="start_time" required
+                   value="{{ now_time }}"
+                   style="width:100%; padding:0.6rem 1rem; border-radius:8px;
+                          background:#0d2137; border:1px solid #1e3a5f; color:#cde;">
+        </div>
+
+        <!-- LOCATION (optional) -->
+        <div class="form-group" style="margin-bottom:1.75rem;">
+            <label style="display:block; color:#8ab4d4; margin-bottom:0.4rem;">
+                Location <span style="color:#4a6a8a;">(optional)</span>
+            </label>
+            <input type="text" name="location" placeholder="e.g. Room 101"
+                   style="width:100%; padding:0.6rem 1rem; border-radius:8px;
+                          background:#0d2137; border:1px solid #1e3a5f; color:#cde;">
+        </div>
+
+        <div style="display:flex; gap:1rem;">
+            <button type="submit" class="btn export" style="padding:0.7rem 2rem;">
+                Start Session & Mark Attendance
+            </button>
+            <a href="{{ url_for('dashboard.dashboard') }}"
+               style="padding:0.7rem 2rem; border-radius:8px; border:1px solid #1e3a5f;
+                      color:#8ab4d4; text-decoration:none; display:flex; align-items:center;">
+                Cancel
+            </a>
+        </div>
+
+    </form>
+
+</section>
+
+{% endblock %}
+
+{% block extra_js %}{% endblock %}

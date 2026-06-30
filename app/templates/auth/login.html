@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Login - AttendanceMS{% endblock %}
+
+{% block content %}
+
+<section class="auth-section">
+
+    <div class="auth-container">
+
+        <div class="auth-header">
+            <h1>Welcome Back</h1>
+            <p>Sign in using your Email and password.</p>
+        </div>
+
+        {% if error %}
+            <div class="alert-message">
+                {{ error }}
+            </div>
+        {% endif %}
+
+        <form action="{{ url_for('auth.login') }}" method="POST" class="auth-form">
+
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" name="email" placeholder="Enter your email address" required>
+            </div>
+
+            <div class="form-group">
+                <label>Password</label>
+                <div class="password-wrapper">
+                    <input type="password" name="password" id="password" placeholder="Enter your password" required>
+                    <button type="button" class="toggle-password" data-target="password" aria-label="Show password">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="btn">
+                Login
+            </button>
+
+            <div class="auth-extra">
+                <p>Don't have an account?</p>
+                <a href="{{ url_for('auth.signup') }}">Sign Up</a>
+            </div>
+
+        </form>
+
+    </div>
+
+</section>
+
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.toggle-password').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var input = document.getElementById(btn.dataset.target);
+            var icon = btn.querySelector('i');
+            var isHidden = input.type === 'password';
+            input.type = isHidden ? 'text' : 'password';
+            icon.classList.toggle('fa-eye');
+            icon.classList.toggle('fa-eye-slash');
+            btn.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}About Us{% endblock %}
+
+{% block content %}
+<section class="about-section">
+
+    <div class="section-heading">
+        <span>ABOUT OUR PROJECT</span>
+        <h1>Learn More About AttendanceMS</h1>
+        <div class="heading-line"></div>
+    </div>
+
+    <div class="info-card">
+        <div class="card-icon">📘</div>
+
+        <div class="card-content">
+            <h2>About This Project</h2>
+            <p>
+                The Student Attendance Management System (AttendanceMS)
+                is a web application designed to simplify and improve
+                how student attendance is recorded and managed in educational institutions.
+            </p>
+        </div>
+    </div>
+
+    <div class="info-card">
+        <div class="card-icon">🎯</div>
+
+        <div class="card-content">
+            <h2>Project Purpose</h2>
+            <p>
+                This system was developed to reduce paper-based attendance tracking,
+                minimize human error and provide a more efficient digital solution.
+            </p>
+        </div>
+    </div>
+
+    <div class="info-card">
+        <div class="card-icon">👨‍💻</div>
+
+        <div class="card-content">
+            <h2>Developers</h2>
+            <p>
+                This project was built by Joseph Acquah and Christian Avorti
+                as part of their CodeCamp tuition training.
+            </p>
+        </div>
+    </div>
+
+    <div class="info-card">
+        <div class="card-icon">🚩</div>
+
+        <div class="card-content">
+            <h2>Our Goal</h2>
+            <p>
+                To make attendance tracking more accurate,
+                faster and easier while improving reliability.
+            </p>
+        </div>
+    </div>
+
+</section>
+
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/about.css') }}">
+{% endblock %}

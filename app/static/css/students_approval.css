@@ -1,0 +1,373 @@
+/* =========================================================
+   AttendanceMS — Approve Students Page Styles
+   Matches admin_teacher.css design system exactly:
+   same palette, same radius vars, same card/glassmorphism style
+   ========================================================= */
+
+/* ── STAT PILLS ────────────────────────────────────────────── */
+.approve-stats {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+  flex-wrap: wrap;
+}
+
+.stat-pill {
+  flex: 1;
+  min-width: 130px;
+  background: rgba(15, 40, 110, 0.65);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 2px solid rgba(80, 150, 255, 0.80);
+  border-radius: var(--radius-xl);
+  padding: 1rem 1.25rem;
+  text-align: center;
+  box-shadow: 0 0 12px rgba(80,150,255,0.35), 0 8px 24px rgba(0,0,40,0.4);
+  transition: all 0.35s ease;
+}
+
+.stat-pill:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0 18px rgba(80,150,255,0.70), 0 0 36px rgba(80,150,255,0.35);
+  border-color: rgba(120,180,255,0.95);
+}
+
+.stat-pill .pill-num {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #7faeff;
+  display: block;
+}
+
+.stat-pill .pill-label {
+  font-size: 0.75rem;
+  color: #7faeff;
+  opacity: 0.7;
+  display: block;
+  margin-top: 0.2rem;
+}
+
+.stat-pill.pending  .pill-num { color: #f39c12; }
+.stat-pill.approved .pill-num { color: #2ecc71; }
+.stat-pill.rejected .pill-num { color: #e74c3c; }
+
+/* ── FILTER / SEARCH BAR ───────────────────────────────────── */
+.approve-controls {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.approve-controls input[type="text"] {
+  flex: 1;
+  min-width: 200px;
+  padding: 9px 18px;
+  background: rgba(20, 55, 155, 0.40);
+  border: 1.5px solid rgba(80, 150, 255, 0.55);
+  border-radius: 9px;
+  color: #e8f0ff;
+  font-size: 0.88rem;
+  outline: none;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+
+.approve-controls input[type="text"]::placeholder { color: rgba(180,210,255,0.55); }
+
+.approve-controls input[type="text"]:focus {
+  background: rgba(40, 90, 200, 0.40);
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(96,165,250,0.20);
+}
+
+.approve-controls select {
+  padding: 9px 14px;
+  background: rgba(20, 55, 155, 0.40);
+  border: 1.5px solid rgba(80, 150, 255, 0.55);
+  border-radius: 9px;
+  color: #e8f0ff;
+  font-size: 0.88rem;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.approve-controls select:focus { border-color: #60a5fa; }
+
+/* ── TABLE CARD ────────────────────────────────────────────── */
+.approve-card {
+  background: rgba(15, 40, 110, 0.65);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1.5px solid rgba(80, 150, 255, 0.80);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: 0 0 12px rgba(80,150,255,0.35), 0 0 28px rgba(80,150,255,0.15), 0 8px 24px rgba(0,0,40,0.4);
+  transition: all 0.35s ease;
+}
+
+.approve-card:hover {
+  box-shadow: 0 0 18px rgba(80,150,255,0.70), 0 0 36px rgba(80,150,255,0.40);
+  border-color: rgba(120,180,255,0.95);
+}
+
+.approve-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.approve-table thead th {
+  padding: 0.85rem 1.1rem;
+  text-align: left;
+  color: #7faeff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid rgba(80,150,255,0.25);
+  background: rgba(10, 25, 80, 0.60);
+}
+
+.approve-table .col-check { width: 40px; }
+
+.approve-table tbody tr {
+  border-bottom: 1px solid rgba(80,150,255,0.12);
+  transition: background 0.15s;
+}
+
+.approve-table tbody tr:last-child { border-bottom: none; }
+
+.approve-table tbody tr:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.approve-table td {
+  padding: 0.85rem 1.1rem;
+  color: #c8d8f8;
+  vertical-align: middle;
+}
+
+/* ── AVATAR + STUDENT CELL ─────────────────────────────────── */
+.approve-student-cell  { display: flex; align-items: center; }
+
+.approve-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--blue-deep);
+  border: 1.5px solid rgba(80,150,255,0.50);
+  color: #a8c8ff;
+  font-weight: 700;
+  font-size: 0.88rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.65rem;
+  flex-shrink: 0;
+}
+
+.approve-student-name  { font-weight: 600; color: #e8f0ff; line-height: 1.3; }
+.approve-student-email { font-size: 0.76rem; color: #7faeff; }
+
+/* ── STATUS BADGE ──────────────────────────────────────────── */
+.approve-badge {
+  display: inline-block;
+  padding: 0.2rem 0.65rem;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.approve-badge-pending  { background: rgba(243,156,18,0.15);  color: #f39c12; border: 1px solid rgba(243,156,18,0.35); }
+.approve-badge-approved { background: rgba(46,204,113,0.12);  color: #2ecc71; border: 1px solid rgba(46,204,113,0.30); }
+.approve-badge-rejected { background: rgba(231,76,60,0.12);   color: #e74c3c; border: 1px solid rgba(231,76,60,0.30); }
+
+/* ── ACTION BUTTONS ────────────────────────────────────────── */
+.approve-action-btns { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+
+.btn-approve,
+.btn-reject,
+.btn-view {
+  padding: 0.32rem 0.8rem;
+  border: none;
+  border-radius: 7px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+.btn-approve:hover,
+.btn-reject:hover,
+.btn-view:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}
+
+.btn-approve { background: #2ecc71; color: #081829; }
+.btn-reject  { background: #e74c3c; color: #fff; }
+.btn-view    { background: rgba(80,150,255,0.20); color: #7faeff; border: 1px solid rgba(80,150,255,0.40); }
+
+/* ── BULK BAR ──────────────────────────────────────────────── */
+.approve-bulk-bar {
+  display: none;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 1.1rem;
+  background: rgba(10,25,80,0.60);
+  border-bottom: 1px solid rgba(80,150,255,0.20);
+  flex-wrap: wrap;
+}
+
+.approve-bulk-bar.visible { display: flex; }
+
+.approve-bulk-bar span { color: #7faeff; font-size: 0.85rem; font-weight: 600; }
+
+.btn-bulk-approve,
+.btn-bulk-reject {
+  padding: 0.38rem 0.9rem;
+  border: none;
+  border-radius: 7px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.btn-bulk-approve:hover,
+.btn-bulk-reject:hover { opacity: 0.85; }
+
+.btn-bulk-approve { background: #2ecc71; color: #081829; }
+.btn-bulk-reject  { background: #e74c3c; color: #fff; }
+
+/* ── EMPTY STATE ───────────────────────────────────────────── */
+.approve-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #7faeff;
+}
+
+.approve-empty-icon {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.approve-empty p { margin: 0; font-size: 0.9rem; }
+
+/* ── PAGINATION ────────────────────────────────────────────── */
+.approve-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 1rem 1.1rem;
+  border-top: 1px solid rgba(80,150,255,0.20);
+}
+
+.approve-page-info { font-size: 0.8rem; color: #7faeff; margin-right: auto; }
+
+.approve-page-btn {
+  padding: 0.32rem 0.75rem;
+  background: rgba(20,55,155,0.40);
+  border: 1.5px solid rgba(80,150,255,0.40);
+  border-radius: 7px;
+  color: #7faeff;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.approve-page-btn:hover    { background: rgba(59,130,246,0.30); border-color: #60a5fa; }
+.approve-page-btn.active   { background: var(--blue); color: #fff; border-color: var(--blue); font-weight: 700; }
+.approve-page-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* ── MODAL ─────────────────────────────────────────────────── */
+.approve-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  z-index: 10000;
+  align-items: center;
+  justify-content: center;
+}
+
+.approve-modal-overlay.open { display: flex; }
+
+.approve-modal-box {
+  background: rgba(10, 28, 90, 0.97);
+  backdrop-filter: blur(20px);
+  border: 1.5px solid rgba(80,150,255,0.70);
+  border-radius: var(--radius-xl);
+  padding: 2rem;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 0 40px rgba(80,150,255,0.30), 0 16px 48px rgba(0,0,0,0.60);
+}
+
+.approve-modal-box h3 {
+  margin: 0 0 1.25rem;
+  color: #e8f0ff;
+  font-size: 1.1rem;
+}
+
+.approve-modal-row        { margin-bottom: 0.7rem; font-size: 0.88rem; }
+.approve-modal-label      { color: #7faeff; display: inline-block; width: 90px; }
+.approve-modal-value      { color: #e8f0ff; font-weight: 500; }
+
+.approve-modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  justify-content: flex-end;
+}
+
+.btn-modal-close {
+  padding: 0.45rem 1rem;
+  background: rgba(80,150,255,0.15);
+  border: 1.5px solid rgba(80,150,255,0.40);
+  border-radius: 8px;
+  color: #7faeff;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-modal-close:hover { background: rgba(80,150,255,0.28); }
+
+/* ── TOAST ─────────────────────────────────────────────────── */
+#approve-toast {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  z-index: 9999;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.25s, transform 0.25s;
+  pointer-events: none;
+}
+
+#approve-toast.show    { opacity: 1; transform: translateY(0); }
+#approve-toast.success { background: #2ecc71; color: #081829; }
+#approve-toast.error   { background: #e74c3c; color: #fff; }
+
+/* ── NOTIFICATION DOT (moved from base inline style) ───────── */
+.notification-dot.has-notifications { background: #e74c3c; }
+.notification-dot.no-notifications  { background: #2ecc71; }
+
+/* ── RESPONSIVE ────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .approve-stats { grid-template-columns: repeat(2, 1fr); }
+  .approve-table thead th:nth-child(3),
+  .approve-table td:nth-child(3)       { display: none; } /* hide Role on mobile */
+}

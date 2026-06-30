@@ -1,0 +1,129 @@
+{% extends "dashboard/base_admin_dashboard.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_teacher.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<!-- ================= PAGE HEADER ================= -->
+<div class="page-header">
+    <h2>Attendance Analytics</h2>
+    <p>Track attendance trends across time</p>
+</div>
+
+<!-- ================= CONTROLS BAR ================= -->
+<section class="controls-bar">
+
+    <!-- DATE FILTER -->
+    <div class="filter-group">
+        <label>From</label>
+        <input type="date" id="fromDate">
+        <label>To</label>
+        <input type="date" id="toDate">
+        <button class="btn" id="applyDateFilter">Apply</button>
+    </div>
+
+    <!-- RANGE TOGGLE -->
+    <div class="toggle-group">
+        <button class="toggle-btn active" data-range="day">Day</button>
+        <button class="toggle-btn" data-range="week">Week</button>
+        <button class="toggle-btn" data-range="month">Month</button>
+    </div>
+
+    <!-- EXPORT BUTTONS -->
+    <div class="export-group">
+        <a href="{{ url_for('dashboard.export_pdf') }}" class="btn export">⬇ Export PDF</a>
+    </div>
+
+</section>
+
+<!-- ================= STATS WIDGETS ================= -->
+<section class="extra-widgets">
+
+    <div class="widget-card">
+        <span class="widget-icon">📊</span>
+        <h3>Attendance Rate</h3>
+        <p id="stat-rate">{{ attendance_rate }}%</p>
+    </div>
+
+    <div class="widget-card">
+        <span class="widget-icon">✅</span>
+        <h3>Present Today</h3>
+        <p id="stat-present">{{ present_count }}</p>
+    </div>
+
+    <div class="widget-card">
+        <span class="widget-icon">🚫</span>
+        <h3>Absent Today</h3>
+        <p id="stat-absent">{{ absent_count }}</p>
+    </div>
+
+    <div class="widget-card">
+        <span class="widget-icon">⏰</span>
+        <h3>Late Arrivals</h3>
+        <p id="stat-late">{{ late_arrivals_count }}</p>
+    </div>
+
+</section>
+
+<!-- ================= MAIN GRID ================= -->
+<section class="dashboard-grid">
+
+    <!-- CHART -->
+    <div class="card large-card">
+        <div class="card-header">
+            <h3>Attendance Trend</h3>
+            <span class="sub" id="chart-mode-label">Week View</span>
+        </div>
+        <div class="chart-wrap">
+            <canvas id="attendanceChart"></canvas>
+        </div>
+    </div>
+
+    <!-- SIDE SUMMARY -->
+    <div class="card side-card">
+        <h3>Summary</h3>
+        <div class="summary-box">
+            <p><strong>Total Records:</strong> {{ total_records }}</p>
+            <p><strong>Present:</strong> {{ present_count }}</p>
+            <p><strong>Absent:</strong> {{ absent_count }}</p>
+            <p><strong>Late Arrivals:</strong> {{ late_arrivals_count }}</p>
+            <p><strong>Attendance Rate:</strong> {{ attendance_rate }}%</p>
+            <p><strong>Active Classes Today:</strong> {{ active_classes_count }}</p>
+        </div>
+    </div>
+
+</section>
+
+<!-- ================= ACTIVITY ================= -->
+<section class="activity-section">
+
+    <h3>Recent Attendance Activity</h3>
+
+    <div class="activity-list">
+        {% if recent_activity %}
+            {% for item in recent_activity %}
+            <div class="activity-item">
+                <span>{{ item.text }}</span>
+                <span class="{{ 'status-positive' if item.status == 'positive' else 'status-negative' }}">
+                    {{ 'Present' if item.status == 'positive' else 'Absent' }}
+                </span>
+                <small>{{ item.time_ago }}</small>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="empty-state">No recent activity found.</p>
+        {% endif %}
+    </div>
+
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}

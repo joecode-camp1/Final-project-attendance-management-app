@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section id="faq-section">
+    <h2>Frequently Asked Questions</h2>
+
+    <div class="faq-item">
+        <h3>What is AttendanceMS?</h3>
+        <p>It is a system for managing student attendance digitally.</p>
+    </div>
+
+    <div class="faq-item">
+        <h3>How do I log in?</h3>
+        <p>Click the login button and enter your credentials.</p>
+    </div>
+
+    <div class="faq-item">
+        <h3>Can I generate reports?</h3>
+        <p>Yes, reports can be generated automatically from the system.</p>
+    </div>
+</section>
+
+{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/help.css') }}">
+{% endblock %}
